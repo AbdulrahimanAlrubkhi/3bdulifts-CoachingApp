@@ -25,6 +25,9 @@ export default async function MorePage() {
           <Link href="/more/feedback" className="block">
             <Card className="text-[15px] font-medium">{t("fb.title")}</Card>
           </Link>
+          <Link href="/more/sharing" className="block">
+            <Card className="text-[15px] font-medium">{t("cs.title")}</Card>
+          </Link>
           {/* row-level security returns only the challenges this client is in */}
           {(challenges ?? []).map((c) => (
             <Link key={c.id} href={`/more/challenges/${c.id}`} className="block">

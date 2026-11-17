@@ -17,7 +17,7 @@ async function all<T>(build: () => any): Promise<T[]> {
   }
 }
 
-type ClientBasics = { id: string; full_name: string; created_at: string; start_date: string | null; training_days_per_week: number | null; onboarded: boolean };
+type ClientBasics = { id: string; full_name: string; created_at: string; start_date: string | null; training_days_per_week: number | null; onboarded: boolean; archived: boolean; email: string | null };
 
 /**
  * Dashboard numbers for the given clients (or every client), from three weeks of data.
@@ -32,12 +32,13 @@ export async function loadClientMetrics(
 
   let clientQuery = supabase
     .from("profiles")
-    .select("id, full_name, created_at, clients(start_date, training_days_per_week, onboarded_at)")
+    .select("id, full_name, created_at, clients(start_date, training_days_per_week, onboarded_at, archived, email)")
     .eq("role", "client")
     .order("full_name");
   if (onlyClientId) clientQuery = clientQuery.eq("id", onlyClientId);
   const { data: rows } = await clientQuery;
-  type Row = { id: string; full_name: string; created_at: string; clients: { start_date: string | null; training_days_per_week: number | null; onboarded_at: string | null } | { start_date: string | null; training_days_per_week: number | null; onboarded_at: string | null }[] | null };
+  type ClientCols = { start_date: string | null; training_days_per_week: number | null; onboarded_at: string | null; archived: boolean; email: string | null };
+  type Row = { id: string; full_name: string; created_at: string; clients: ClientCols | ClientCols[] | null };
   const clients: ClientBasics[] = ((rows ?? []) as Row[]).map((r) => {
     const c = Array.isArray(r.clients) ? r.clients[0] : r.clients;
     return {
@@ -47,6 +48,8 @@ export async function loadClientMetrics(
       start_date: c?.start_date ?? null,
       training_days_per_week: c?.training_days_per_week ?? null,
       onboarded: Boolean(c?.onboarded_at),
+      archived: Boolean(c?.archived),
+      email: c?.email ?? null,
     };
   });
   const ids = clients.map((c) => c.id);

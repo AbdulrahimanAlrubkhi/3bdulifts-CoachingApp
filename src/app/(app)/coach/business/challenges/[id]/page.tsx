@@ -9,7 +9,8 @@ import { deleteChallenge, saveChallenge, saveChallengeMembers } from "../../acti
 
 export default async function ChallengePage({ params, searchParams }: PageProps<"/coach/business/challenges/[id]">) {
   const { id } = await params;
-  const sort = (await searchParams).sort === "consistency" ? "consistency" : "weight";
+  // consistency first: it rewards showing up and suits every goal; weight change is optional
+  const sort = (await searchParams).sort === "weight" ? "weight" : "consistency";
   await requireCoach();
   const { t, locale } = await getT();
   const supabase = await createClient();

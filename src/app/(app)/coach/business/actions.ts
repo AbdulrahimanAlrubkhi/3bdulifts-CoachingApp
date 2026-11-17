@@ -126,7 +126,7 @@ export async function saveWin(formData: FormData) {
     after_waist_cm: num(formData.get("after_waist_cm"), 10, 300),
     before_photo: text(formData.get("before_photo"), 300),
     after_photo: text(formData.get("after_photo"), 300),
-    consent_given: formData.get("consent_given") === "on",
+    // publication consent is given by the client in their app, never set here
   };
   const supabase = await createClient();
   if (id) await supabase.from("testimonials").update(row).eq("id", id);

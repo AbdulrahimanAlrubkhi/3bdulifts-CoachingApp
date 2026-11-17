@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import { requireCoach } from "@/lib/auth";
 import { PHOTO_BUCKET, PHOTO_LINK_SECONDS } from "@/lib/checkins";
+import { CONSENT_COLUMNS, type ConsentRow } from "@/lib/consent";
+import { ConsentBadges } from "@/components/ConsentBadges";
 import { weightSeries } from "@/lib/coach-metrics";
 import { daysBetween, todayISO } from "@/lib/dates";
 import { getT } from "@/lib/i18n";
@@ -45,6 +47,10 @@ export default async function WinFormPage({ params, searchParams }: PageProps<"/
     prefilled = true;
   }
 
+  const { data: consentRows } = win.client_id
+    ? await supabase.from("publication_consents").select(CONSENT_COLUMNS).eq("client_id", win.client_id)
+    : { data: [] };
+  const consents = (consentRows ?? []) as ConsentRow[];
   const paths = [win.before_photo, win.after_photo].filter((p): p is string => Boolean(p));
   const { data: signed } = paths.length ? await supabase.storage.from(PHOTO_BUCKET).createSignedUrls(paths, PHOTO_LINK_SECONDS) : { data: [] };
   const url = (p: string | null | undefined) => (p ? (signed ?? []).find((s) => s.path === p)?.signedUrl ?? null : null);
@@ -113,10 +119,10 @@ export default async function WinFormPage({ params, searchParams }: PageProps<"/
           <Field label={t("win.quote")}>
             <textarea name="quote" rows={3} defaultValue={win.quote ?? ""} className={`${inputClass} h-auto py-2`} />
           </Field>
-          <label className="flex items-center gap-2 text-sm">
-            <input type="checkbox" name="consent_given" defaultChecked={win.consent_given ?? false} className="h-5 w-5 accent-(--accent)" />
-            {t("win.consent")}
-          </label>
+          <div>
+            <p className="mb-1.5 text-sm text-muted">{t("cs.coachView")}</p>
+            <ConsentBadges rows={consents} clientId={win.client_id ?? null} t={t} locale={locale} />
+          </div>
           <button className={buttonClass}>{t("w.save")}</button>
         </form>
       </Card>

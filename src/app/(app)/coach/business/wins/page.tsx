@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { requireCoach } from "@/lib/auth";
 import { PHOTO_BUCKET, PHOTO_LINK_SECONDS } from "@/lib/checkins";
+import { CONSENT_COLUMNS, type ConsentRow } from "@/lib/consent";
+import { ConsentBadges } from "@/components/ConsentBadges";
 import { getT } from "@/lib/i18n";
 import { createClient } from "@/lib/supabase/server";
 import { fmt, toDisplay } from "@/lib/units";
@@ -17,20 +19,25 @@ type Win = {
   after_waist_cm: number | null;
   before_photo: string | null;
   after_photo: string | null;
-  consent_given: boolean;
+  client_id: string | null;
   profiles: { full_name: string } | null;
 };
 
 // Results tracker (spec #20): client wins with before/after numbers, for marketing proof.
 export default async function WinsPage() {
   const coach = await requireCoach();
-  const { t } = await getT();
+  const { t, locale } = await getT();
   const supabase = await createClient();
   const { data } = await supabase
     .from("testimonials")
-    .select("id, title, quote, weeks, before_weight_kg, after_weight_kg, before_waist_cm, after_waist_cm, before_photo, after_photo, consent_given, profiles(full_name)")
+    .select("id, title, quote, weeks, before_weight_kg, after_weight_kg, before_waist_cm, after_waist_cm, before_photo, after_photo, client_id, profiles(full_name)")
     .order("created_at", { ascending: false });
   const wins = (data ?? []) as unknown as Win[];
+  const clientIds = [...new Set(wins.map((w) => w.client_id).filter((id): id is string => Boolean(id)))];
+  const { data: consentRows } = clientIds.length
+    ? await supabase.from("publication_consents").select(CONSENT_COLUMNS).in("client_id", clientIds)
+    : { data: [] };
+  const consents = (consentRows ?? []) as ConsentRow[];
   const paths = wins.flatMap((w) => [w.before_photo, w.after_photo]).filter((p): p is string => Boolean(p));
   const { data: signed } = paths.length ? await supabase.storage.from(PHOTO_BUCKET).createSignedUrls([...new Set(paths)], PHOTO_LINK_SECONDS) : { data: [] };
   const url = (p: string | null) => (p ? (signed ?? []).find((s) => s.path === p)?.signedUrl ?? null : null);
@@ -61,11 +68,12 @@ export default async function WinsPage() {
                         <h2 className="text-[15px] font-medium">{win.title}</h2>
                         <p className="text-xs text-muted">{win.profiles?.full_name ?? "—"}</p>
                       </div>
-                      <span className={`shrink-0 rounded border px-1.5 py-0.5 text-[11px] ${win.consent_given ? "border-accent text-accent" : "border-line text-muted"}`}>
-                        {win.consent_given ? `✓ ${t("win.cleared")}` : t("win.noConsent")}
-                      </span>
+                    </div>
+                    <div className="mt-2">
+                      <ConsentBadges rows={consents} clientId={win.client_id} t={t} locale={locale} />
                     </div>
                     {(win.before_photo || win.after_photo) && (
+                      // private photos stay visible to the coach; the badge above says whether they may be published
                       <div className="mt-3 grid grid-cols-2 gap-2">
                         {[win.before_photo, win.after_photo].map((p, i) => (
                           <div key={i} className="aspect-[3/4] overflow-hidden rounded-md border border-line bg-bg">

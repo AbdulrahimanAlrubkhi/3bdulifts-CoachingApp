@@ -10,7 +10,8 @@ import { PageTitle } from "@/components/ui";
 // and the leaderboard function refuses non-members.
 export default async function ClientChallengePage({ params, searchParams }: PageProps<"/more/challenges/[id]">) {
   const { id } = await params;
-  const sort = (await searchParams).sort === "consistency" ? "consistency" : "weight";
+  // consistency first: it rewards showing up and suits every goal; weight change is optional
+  const sort = (await searchParams).sort === "weight" ? "weight" : "consistency";
   const profile = await requireProfile();
   const { t, locale } = await getT();
   const supabase = await createClient();

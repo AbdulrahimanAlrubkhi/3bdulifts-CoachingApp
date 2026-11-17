@@ -10,13 +10,15 @@ import { selectClass } from "@/components/ExerciseList";
 import { FlagChip, NutritionPct, Pct, WeightAndTrend, lastCheckinText } from "@/components/MetricBits";
 import { Card, Field, accentButtonClass, buttonClass, ghostButtonClass, inputClass } from "@/components/ui";
 import { saveClientProfile } from "./actions";
+import { setArchived } from "../../client-admin-actions";
 import type { TabProps } from "./tab-props";
 
 export async function OverviewTab({ clientId, client, name, t, unit }: TabProps) {
   const supabase = await createClient();
   const today = todayISO();
-  const [{ metrics }, target] = await Promise.all([loadClientMetrics(supabase, clientId), targetOn(supabase, clientId, today)]);
+  const [{ metrics, clients }, target] = await Promise.all([loadClientMetrics(supabase, clientId), targetOn(supabase, clientId, today)]);
   const m = metrics.get(clientId)!;
+  const archived = clients[0]?.archived ?? false;
   const answers = client.onboarding ?? {};
   const age = ageOn(client.birth_date, today);
 
@@ -193,6 +195,16 @@ export async function OverviewTab({ clientId, client, name, t, unit }: TabProps)
             <textarea name="injuries" rows={2} defaultValue={client.injuries ?? ""} className={`${inputClass} h-auto py-2`} />
           </Field>
           <button className={buttonClass}>{t("w.save")}</button>
+        </form>
+      </Card>
+
+      <Card>
+        <h2 className="text-sm font-medium">{archived ? t("cc.archivedClient") : t("cc.endCoaching")}</h2>
+        <p className="mt-0.5 mb-3 text-xs text-muted">{t("cc.archiveHint")}</p>
+        <form action={setArchived}>
+          <input type="hidden" name="client_id" value={clientId} />
+          <input type="hidden" name="archived" value={archived ? "false" : "true"} />
+          <button className={ghostButtonClass}>{archived ? t("cc.restore") : t("cc.archive")}</button>
         </form>
       </Card>
     </div>

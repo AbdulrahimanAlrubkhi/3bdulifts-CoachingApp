@@ -24,11 +24,11 @@ export function Leaderboard({
   const sorted = [...rows].sort((a, b) =>
     sort === "weight"
       ? (a.weight_change_pct ?? Infinity) - (b.weight_change_pct ?? Infinity)
-      : (b.consistency_pct ?? -1) - (a.consistency_pct ?? -1),
+      : (b.consistency_pct ?? -1) - (a.consistency_pct ?? -1) || (a.weight_change_pct ?? Infinity) - (b.weight_change_pct ?? Infinity),
   );
   const tab = (key: "weight" | "consistency", label: string) => (
     <Link
-      href={key === "weight" ? baseHref : `${baseHref}?sort=consistency`}
+      href={key === "consistency" ? baseHref : `${baseHref}?sort=weight`}
       aria-current={sort === key ? "page" : undefined}
       className={`flex-1 rounded-md py-2 text-center text-sm ${sort === key ? "border border-line bg-surface text-text" : "text-muted"}`}
     >
@@ -41,8 +41,8 @@ export function Leaderboard({
   return (
     <div>
       <div className="mb-2 flex gap-1 rounded-lg bg-bg p-1">
-        {tab("weight", t("ch.byWeight"))}
         {tab("consistency", t("ch.byConsistency"))}
+        {tab("weight", t("ch.byWeight"))}
       </div>
       <Card className="py-1">
         {!sorted.length ? (
@@ -71,6 +71,7 @@ export function Leaderboard({
         <span className="w-12 text-end">{t("ch.consistency")}</span>
       </div>
       <p className="mt-2 text-xs text-muted">{t("ch.consistencyHint")}</p>
+      {sort === "weight" && <p className="mt-1 text-xs text-muted">{t("ch.weightHint")}</p>}
     </div>
   );
 }
