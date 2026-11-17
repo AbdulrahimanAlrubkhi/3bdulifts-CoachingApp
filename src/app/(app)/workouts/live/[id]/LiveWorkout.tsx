@@ -338,7 +338,13 @@ export function LiveWorkout({ workout, initialExercises, initialPrevious, target
     // ...and so are exercises left without a single logged set
     const empty = exercises.filter((e) => !e.sets.some((s) => s.completedAt)).map((e) => e.id);
     if (empty.length) await supabase.from("workout_exercises").delete().in("id", empty);
-    const ok = check(await supabase.from("workouts").update({ ended_at: new Date().toISOString() }).eq("id", workout.id));
+    // A workout left open for hours (phone put away, finished later) would show a silly duration.
+    // If it has been open more than 3 hours, it ends 5 minutes after the last logged set instead.
+    const lastSet = exercises.flatMap((e) => e.sets.map((s) => s.completedAt).filter((d): d is string => Boolean(d))).sort().at(-1);
+    const openFor = Date.now() - new Date(workout.started_at).getTime();
+    const endedAt =
+      openFor > 3 * 3600 * 1000 && lastSet ? new Date(new Date(lastSet).getTime() + 5 * 60 * 1000).toISOString() : new Date().toISOString();
+    const ok = check(await supabase.from("workouts").update({ ended_at: endedAt }).eq("id", workout.id));
     if (ok) {
       try {
         localStorage.removeItem(draftKey);
