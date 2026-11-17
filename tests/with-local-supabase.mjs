@@ -1,17 +1,17 @@
-// Runs a test file with the LOCAL Supabase address and keys taken from {"_tag":"Error","error":{"code":"UnknownSubcommand","message":"Unknown subcommand "status\" for "supabase"
-
-  Did you mean this?
-    status"}}.
+// Runs a test file with the LOCAL Supabase address and keys taken from `npx supabase status`.
 // Usage: node tests/with-local-supabase.mjs tests/security.integration.ts
 import { execSync, spawnSync } from "node:child_process";
 
 const env = Object.fromEntries(
   execSync("npx supabase status -o env", { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] })
-    .split(/?
-/)
-    .filter((l) => l.includes("="))
-    .map((l) => [l.slice(0, l.indexOf("=")), l.slice(l.indexOf("=") + 1).replace(/^"|"$/g, "")]),
+    .split(/\r?\n/)
+    .filter((line) => /^[A-Z_]+=/.test(line))
+    .map((line) => [line.slice(0, line.indexOf("=")), line.slice(line.indexOf("=") + 1).replace(/^"|"$/g, "")]),
 );
+if (!env.API_URL) {
+  console.error("Local Supabase is not running. Start it with: npx supabase start");
+  process.exit(2);
+}
 const result = spawnSync("npx", ["tsx", ...process.argv.slice(2)], {
   stdio: "inherit",
   shell: true,
