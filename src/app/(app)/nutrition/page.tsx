@@ -5,7 +5,7 @@ import { getT } from "@/lib/i18n";
 import { MEALS, grams, kcal, normalizeLog, sum, targetOn, type LogRow } from "@/lib/nutrition";
 import { createClient } from "@/lib/supabase/server";
 import { MacroBars } from "@/components/MacroBars";
-import { Card, ghostButtonClass } from "@/components/ui";
+import { Card, ghostButtonClass, accentButtonClass } from "@/components/ui";
 import { changeWater, deleteFoodLog } from "./actions";
 
 export default async function NutritionPage({ searchParams }: PageProps<"/nutrition">) {
@@ -75,7 +75,7 @@ export default async function NutritionPage({ searchParams }: PageProps<"/nutrit
           <button name="delta" value="-250" disabled={waterMl === 0} className={`${ghostButtonClass} num disabled:opacity-40`}>
             −250
           </button>
-          <button name="delta" value="250" className={`${ghostButtonClass} num border-accent text-accent`}>
+          <button name="delta" value="250" className={`${accentButtonClass} num`}>
             +250
           </button>
         </form>

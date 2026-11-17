@@ -2,7 +2,7 @@ import Link from "next/link";
 import { requireProfile } from "@/lib/auth";
 import { getT } from "@/lib/i18n";
 import { createClient } from "@/lib/supabase/server";
-import { Card, PageTitle, buttonClass, ghostButtonClass } from "@/components/ui";
+import { Card, PageTitle, buttonClass, ghostButtonClass, accentButtonClass } from "@/components/ui";
 import { createRoutine, startWorkout } from "./actions";
 
 type RoutineRow = { id: string; title: string; owner_id: string; routine_exercises: { count: number }[] };
@@ -35,7 +35,7 @@ export default async function WorkoutsPage() {
             {!isCoach && !live && (
               <form action={startWorkout}>
                 <input type="hidden" name="routine_id" value={routine.id} />
-                <button className={`${ghostButtonClass} border-accent text-accent`}>{t("w.start")}</button>
+                <button className={`${accentButtonClass}`}>{t("w.start")}</button>
               </form>
             )}
           </Card>

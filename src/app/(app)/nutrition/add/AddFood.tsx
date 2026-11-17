@@ -192,17 +192,30 @@ export function AddFood({ foods, savedIds, initialMeal, date }: { foods: Food[];
                   className={`${inputClass} num w-28 text-center`}
                 />
               </Field>
-              {chosen.serving_g && (
-                <button
-                  type="button"
-                  onClick={() => setAmount(String(chosen.serving_g))}
-                  className={`${ghostButtonClass} h-11`}
-                >
-                  1 {(name({ name_ar: chosen.serving_ar ?? "", name_en: chosen.serving_en ?? "" }) || t("n.serving"))} ·{" "}
-                  <span className="num">{chosen.serving_g}</span>
-                  {t("n.g")}
-                </button>
-              )}
+              {chosen.serving_g && (() => {
+                // count in servings (e.g. dates, eggs, loaves); grams stay the source of truth
+                const per = chosen.serving_g;
+                const count = Math.round((amountG / per) * 10) / 10;
+                const step = (by: number) => setAmount(String(Math.max(1, Math.round(count) + by) * per));
+                const label = name({ name_ar: chosen.serving_ar ?? "", name_en: chosen.serving_en ?? "" }) || t("n.serving");
+                return (
+                  <div className="flex h-11 items-center gap-1 whitespace-nowrap">
+                    <button type="button" onClick={() => step(-1)} aria-label="−1" className="h-11 w-10 rounded-md border border-line text-lg">
+                      −
+                    </button>
+                    <span className="min-w-16 px-1 text-center text-sm">
+                      <span className="num">{count}</span> {label}
+                      <span className="block text-[11px] text-muted">
+                        <span className="num">{per}</span>
+                        {t("n.g")}
+                      </span>
+                    </span>
+                    <button type="button" onClick={() => step(1)} aria-label="+1" className="h-11 w-10 rounded-md border border-line text-lg">
+                      +
+                    </button>
+                  </div>
+                );
+              })()}
             </div>
             <button
               type="button"

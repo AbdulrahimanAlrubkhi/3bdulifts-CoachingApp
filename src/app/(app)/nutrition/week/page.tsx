@@ -34,7 +34,8 @@ export default async function WeekPage({ searchParams }: PageProps<"/nutrition/w
   const averages: Macros = { calories: avg("calories"), protein_g: avg("protein_g"), carbs_g: avg("carbs_g"), fat_g: avg("fat_g"), fiber_g: avg("fiber_g") };
 
   const points = days.map((d) => ({
-    label: formatDay(d, "en", { weekday: "short" }),
+    // day of month reads the same in both languages and fits seven bars on a phone
+    label: String(Number(d.slice(8))),
     calories: byDay.has(d) ? Math.round(Number(byDay.get(d)!.calories)) : null,
   }));
 
@@ -51,7 +52,7 @@ export default async function WeekPage({ searchParams }: PageProps<"/nutrition/w
       <PageTitle>{t("n.week")}</PageTitle>
       <p className="-mt-3 mb-4 text-sm text-muted">
         {formatDay(start, locale, { day: "numeric", month: "short" })} – {formatDay(end, locale, { day: "numeric", month: "short" })} ·{" "}
-        <span className="num">{logged.length}</span>/<span className="num">7</span> {t("n.daysLogged")}
+        <span className="num">{`${logged.length}/7`}</span> {t("n.daysLogged")}
       </p>
 
       <Card className="mb-3">

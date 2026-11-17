@@ -6,11 +6,17 @@ export const inputClass =
 export const buttonClass =
   "h-11 w-full rounded-md bg-accent px-4 text-[15px] font-medium text-accent-ink transition-opacity hover:opacity-90 disabled:opacity-50";
 
+/** Outlined in the accent colour: the one action to take on a card. */
+export const accentButtonClass =
+  "h-9 rounded-md border border-accent px-3 text-sm text-accent transition-opacity hover:opacity-80";
+
 export const ghostButtonClass =
   "h-9 rounded-md border border-line px-3 text-sm text-muted hover:text-text transition-colors";
 
 export function Card({ children, className = "" }: { children: ReactNode; className?: string }) {
-  return <section className={`rounded-lg border border-line bg-surface p-4 ${className}`}>{children}</section>;
+  // a highlighted card passes border-accent; the default line colour must not override it
+  const border = className.includes("border-accent") ? "" : "border-line";
+  return <section className={`rounded-lg border ${border} bg-surface p-4 ${className}`}>{children}</section>;
 }
 
 export function PageTitle({ children }: { children: ReactNode }) {

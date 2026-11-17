@@ -1,7 +1,7 @@
 import { requireProfile } from "@/lib/auth";
 import { getT } from "@/lib/i18n";
 import { LocaleToggle, ThemeToggle } from "@/components/Prefs";
-import { Card, PageTitle, ghostButtonClass } from "@/components/ui";
+import { Card, PageTitle, ghostButtonClass, accentButtonClass } from "@/components/ui";
 import { signout } from "../../(auth)/actions";
 import { setUnit } from "./actions";
 
@@ -31,7 +31,7 @@ export default async function MorePage() {
                 key={unit}
                 name="unit"
                 value={unit}
-                className={`${ghostButtonClass} ${profile.unit === unit ? "border-accent text-accent" : ""}`}
+                className={`${profile.unit === unit ? accentButtonClass : ghostButtonClass}`}
               >
                 {t(unit === "kg" ? "settings.kg" : "settings.lb")}
               </button>

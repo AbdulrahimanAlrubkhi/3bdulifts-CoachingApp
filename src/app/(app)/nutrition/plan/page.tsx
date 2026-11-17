@@ -5,7 +5,7 @@ import { getT } from "@/lib/i18n";
 import { MEALS, type Meal } from "@/lib/nutrition";
 import { createClient } from "@/lib/supabase/server";
 import { MacroLine } from "@/components/MacroLine";
-import { Card, PageTitle, ghostButtonClass } from "@/components/ui";
+import { Card, PageTitle, ghostButtonClass, accentButtonClass } from "@/components/ui";
 import { logMealOption, unlogMealOption } from "../actions";
 
 type OptionRow = {
@@ -108,7 +108,7 @@ export default async function MealPlanPickPage({ searchParams }: PageProps<"/nut
                             ) : (
                               <button
                                 disabled={!option.meal_option_items.length}
-                                className={`${ghostButtonClass} border-accent text-accent disabled:opacity-40`}
+                                className={`${accentButtonClass} disabled:opacity-40`}
                               >
                                 {t("n.log")}
                               </button>

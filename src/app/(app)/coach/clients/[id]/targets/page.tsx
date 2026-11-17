@@ -34,7 +34,8 @@ export default async function TargetsPage({ params }: PageProps<"/coach/clients/
       <PageTitle>{t("n.targets")}</PageTitle>
 
       <Card className="mb-4">
-        <TargetForm clientId={id} current={current} today={today} />
+        {/* keyed so the form starts fresh from the new current target after each save */}
+        <TargetForm key={`${current?.id}-${history.length}`} clientId={id} current={current} today={today} />
       </Card>
 
       {history.length > 0 && (
