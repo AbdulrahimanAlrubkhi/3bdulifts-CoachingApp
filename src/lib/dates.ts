@@ -45,3 +45,13 @@ export function formatDay(iso: string, locale: "ar" | "en", options: Intl.DateTi
     new Date(`${iso}T00:00:00Z`),
   );
 }
+
+/** The Oman calendar date of a timestamp, e.g. when a workout started. */
+export function dateInAppTz(timestamp: string | Date): string {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: APP_TZ }).format(new Date(timestamp));
+}
+
+/** Whole days from `from` to `to` (both ISO dates). */
+export function daysBetween(from: string, to: string): number {
+  return Math.round((Date.parse(`${to}T00:00:00Z`) - Date.parse(`${from}T00:00:00Z`)) / 86400000);
+}

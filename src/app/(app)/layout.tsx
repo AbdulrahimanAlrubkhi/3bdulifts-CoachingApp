@@ -1,5 +1,6 @@
 import { Suspense, type ReactNode } from "react";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { requireProfile } from "@/lib/auth";
 import { getT } from "@/lib/i18n";
 import { PrefsProvider } from "@/lib/i18n/client";
@@ -18,6 +19,8 @@ export default function AppLayout({ children }: LayoutProps<"/">) {
 // Signed-in shell: top bar + role-specific bottom tabs.
 async function Shell({ children }: { children: ReactNode }) {
   const profile = await requireProfile();
+  // new clients fill in the questionnaire before anything else (spec #14)
+  if (!profile.onboarded) redirect("/onboarding");
   const { t, locale } = await getT();
 
   const tabs: Tab[] =

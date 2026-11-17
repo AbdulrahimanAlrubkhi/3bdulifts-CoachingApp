@@ -16,8 +16,8 @@ Bottom tab bar: Today · Workouts · Nutrition · Check-in · More
 
 | Route | Page | Spec # | Status |
 |---|---|---|---|
-| `/onboarding` | Onboarding questionnaire (shown once after sign-up) | 14 | step 4 |
-| `/today` | Today: assigned workout, macros left, check-in status, latest coach feedback, renewal reminder | 9, 17, 18 | workouts, macros, check-in status built; feedback + renewal in steps 4–5 |
+| `/onboarding` | Onboarding questionnaire (shown once after sign-up) | 14 | built |
+| `/today` | Today: assigned workout, macros left, check-in status, latest coach feedback, renewal reminder | 9, 17, 18 | built except renewal reminder (step 5) |
 | `/workouts` | Routines (mine + assigned by coach), start workout | 2 | built |
 | `/workouts/routines/new`, `/workouts/routines/[id]` | Routine editor: add, reorder, targets, share link | 2 | built |
 | `/workouts/live/[id]` | Live logging: weight/reps/RPE per set, rest timer, previous numbers | 3 | built |
@@ -31,7 +31,7 @@ Bottom tab bar: Today · Workouts · Nutrition · Check-in · More
 | `/checkin` | Daily check-in | 11 | built |
 | `/checkin/weekly` | Weekly check-in: measurements, photos, reflection | 12 | built |
 | `/more` | Feedback from coach, challenges, subscription, settings | 17, 18, 19 | built (settings); rest per step |
-| `/more/feedback` | Weekly feedback history | 17 | step 4 |
+| `/more/feedback` | Weekly feedback history | 17 | built |
 | `/more/challenges/[id]` | Challenge leaderboard | 19 | step 5 |
 
 ## Coach
@@ -40,8 +40,8 @@ Same shell, coach tab bar: Clients · Library · Business · More
 
 | Route | Page | Spec # | Status |
 |---|---|---|---|
-| `/coach` | Dashboard: every client with last check-in, 7-day avg weight + trend, workout %, nutrition %, flags | 15 | shell built; data in step 4 |
-| `/coach/clients/[id]` | Client detail, tabs: Overview · Training · Nutrition · Check-ins · Photos · Notes | 13, 16, 17 | links to targets + meal plans built; rest step 4 |
+| `/coach` | Dashboard: every client with last check-in, 7-day avg weight + trend, workout %, nutrition %, flags | 15 | built |
+| `/coach/clients/[id]` | Client detail, tabs: Overview · Training · Nutrition · Check-ins · Photos · Notes | 13, 16, 17 | built |
 | `/coach/clients/[id]/targets` | Nutrition targets + phase history | 6 | built |
 | `/coach/clients/[id]/export` | CSV / PDF export | 21 | step 5 |
 | `/coach/library` → `/workouts` | Routine templates, assign to clients (same routine pages as clients) | 2 | built |
@@ -58,6 +58,6 @@ Same shell, coach tab bar: Clients · Library · Business · More
 1. **Workouts** — spec 1–5, plus 50-exercise seed *(done)*
 2. **Nutrition** — spec 6–10, plus 166-food seed *(done)*
 3. **Check-ins** — spec 11–12 *(done)*
-4. **Coach core** — spec 13–17
+4. **Coach core** — spec 13–17 *(done)*
 5. **Business** — spec 18–21
 6. **Deploy** — final README pass, Vercel

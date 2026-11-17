@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { requireProfile } from "@/lib/auth";
 import { getT } from "@/lib/i18n";
 import { LocaleToggle, ThemeToggle } from "@/components/Prefs";
@@ -13,6 +14,11 @@ export default async function MorePage() {
 
   return (
     <>
+      {profile.role === "client" && (
+        <Link href="/more/feedback" className="mb-4 block">
+          <Card className="text-[15px] font-medium">{t("fb.title")}</Card>
+        </Link>
+      )}
       <PageTitle>{t("settings.title")}</PageTitle>
       <Card className="divide-y divide-line py-1">
         <div className={row}>

@@ -10,6 +10,8 @@ export type Profile = {
   role: "coach" | "client";
   full_name: string;
   unit: "kg" | "lb";
+  /** false until a client has filled in the onboarding questionnaire; always true for the coach */
+  onboarded: boolean;
 };
 
 /** The signed-in user's profile, or null. Verified against Supabase on every request. */
@@ -21,10 +23,18 @@ export const getProfile = cache(async (): Promise<Profile | null> => {
   if (!auth.user) return null;
   const { data } = await supabase
     .from("profiles")
-    .select("id, role, full_name, unit")
+    .select("id, role, full_name, unit, clients(onboarded_at)")
     .eq("id", auth.user.id)
     .single();
-  return (data as Profile | null) ?? null;
+  if (!data) return null;
+  const client = Array.isArray(data.clients) ? data.clients[0] : data.clients;
+  return {
+    id: data.id,
+    role: data.role,
+    full_name: data.full_name,
+    unit: data.unit,
+    onboarded: data.role === "coach" || Boolean(client?.onboarded_at),
+  };
 });
 
 export async function requireProfile(): Promise<Profile> {

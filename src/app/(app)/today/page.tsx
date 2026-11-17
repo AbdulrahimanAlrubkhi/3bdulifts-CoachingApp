@@ -15,7 +15,7 @@ export default async function TodayPage() {
   const { t, locale } = await getT();
   const supabase = await createClient();
   const today = todayISO();
-  const [{ data: live }, target, { data: logRows }, { data: checkin }, { data: weekly }] = await Promise.all([
+  const [{ data: live }, target, { data: logRows }, { data: checkin }, { data: weekly }, { data: feedback }] = await Promise.all([
     supabase.from("workouts").select("id").eq("user_id", profile.id).is("ended_at", null).limit(1).maybeSingle(),
     targetOn(supabase, profile.id, today),
     supabase
@@ -25,6 +25,13 @@ export default async function TodayPage() {
       .eq("log_date", today),
     supabase.from("daily_checkins").select("weight_kg").eq("user_id", profile.id).eq("check_date", today).maybeSingle(),
     supabase.from("weekly_checkins").select("id").eq("user_id", profile.id).eq("week_start", weekStartOf(today)).maybeSingle(),
+    supabase
+      .from("weekly_feedback")
+      .select("week_start, body, read_at")
+      .eq("client_id", profile.id)
+      .order("week_start", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
   ]);
   const totals = sum(((logRows ?? []) as LogRow[]).map(normalizeLog));
 
@@ -34,8 +41,19 @@ export default async function TodayPage() {
         {t("today.greeting")}
         {profile.full_name ? `${locale === "ar" ? "،" : ","} ${profile.full_name}` : ""}
       </PageTitle>
-      {/* coach feedback joins this page in step 4 */}
       <div className="space-y-3">
+        {feedback && (
+          // the latest note from the coach comes first; the full text is one tap away
+          <Link href="/more/feedback" className="block">
+            <Card className={feedback.read_at ? "" : "border-accent"}>
+              <h2 className="flex items-center justify-between text-sm font-medium">
+                {t("fb.title")}
+                {!feedback.read_at && <span className="text-xs font-normal text-accent">{t("fb.new")}</span>}
+              </h2>
+              <p className="mt-1 line-clamp-3 text-sm whitespace-pre-wrap text-muted">{feedback.body}</p>
+            </Card>
+          </Link>
+        )}
         <Card>
           <h2 className="text-sm font-medium">{t("nav.workouts")}</h2>
           <Link
