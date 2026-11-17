@@ -1,11 +1,14 @@
 import "server-only";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { connection } from "next/server";
 import { SUPABASE_KEY, SUPABASE_URL } from "./env";
 
 /** Supabase client for Server Components, Server Actions and Route Handlers.
  *  It carries the signed-in user's session, so row-level security applies to every query. */
 export async function createClient() {
+  // Supabase reads the clock to check token expiry, so this must run at request time, never during prerendering.
+  await connection();
   const cookieStore = await cookies();
   return createServerClient(SUPABASE_URL, SUPABASE_KEY, {
     cookies: {

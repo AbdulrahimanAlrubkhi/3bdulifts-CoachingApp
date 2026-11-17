@@ -53,8 +53,8 @@ export default async function HistoryPage() {
                     <dl className="mt-2 flex gap-5 text-xs text-muted">
                       <div>
                         <dt className="inline">{t("w.duration")} </dt>
-                        <dd className="num inline text-text">
-                          {minutes} {t("w.min")}
+                        <dd className="inline text-text">
+                          <span className="num">{minutes}</span> {t("w.min")}
                         </dd>
                       </div>
                       <div>

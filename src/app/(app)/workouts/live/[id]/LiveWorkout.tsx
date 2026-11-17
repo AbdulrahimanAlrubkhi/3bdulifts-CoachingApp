@@ -197,6 +197,9 @@ export function LiveWorkout({ workout, initialExercises, initialPrevious, target
     // sets that were never ticked are dropped; only logged work is kept
     const unfinished = exercises.flatMap((e) => e.sets.filter((s) => !s.completedAt).map((s) => s.id));
     if (unfinished.length) await supabase.from("workout_sets").delete().in("id", unfinished);
+    // ...and so are exercises left without a single logged set
+    const empty = exercises.filter((e) => !e.sets.some((s) => s.completedAt)).map((e) => e.id);
+    if (empty.length) await supabase.from("workout_exercises").delete().in("id", empty);
     const ok = check(await supabase.from("workouts").update({ ended_at: new Date().toISOString() }).eq("id", workout.id));
     if (ok) router.push(`/workouts/history/${workout.id}`);
     else setBusy(false);

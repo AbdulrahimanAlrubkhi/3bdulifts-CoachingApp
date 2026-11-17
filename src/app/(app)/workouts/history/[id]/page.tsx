@@ -52,8 +52,8 @@ export default async function WorkoutDetailPage({ params }: PageProps<"/workouts
         <dl className="grid grid-cols-3 gap-3 text-center">
           <div>
             <dt className="text-xs text-muted">{t("w.duration")}</dt>
-            <dd className="num mt-1 text-base font-semibold">
-              {minutes} {t("w.min")}
+            <dd className="mt-1 text-base font-semibold">
+              <span className="num">{minutes}</span> {t("w.min")}
             </dd>
           </div>
           <div>

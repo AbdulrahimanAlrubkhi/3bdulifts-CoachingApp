@@ -124,7 +124,7 @@ export function RoutineEditor({ routine, initialItems, exercises, clients }: Pro
                   </button>
                 </span>
               </div>
-              <div className="mt-3 grid grid-cols-5 gap-2" dir="ltr">
+              <div className="mt-3 grid grid-cols-5 gap-2">
                 {(
                   [
                     ["sets", t("w.sets")],

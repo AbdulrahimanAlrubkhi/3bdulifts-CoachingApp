@@ -1,6 +1,6 @@
 import "server-only";
 import { cache } from "react";
-import { cookies } from "next/headers";
+import { connection } from "next/server";
 import { redirect } from "next/navigation";
 import { createClient } from "./supabase/server";
 import { supabaseConfigured } from "./supabase/env";
@@ -14,7 +14,7 @@ export type Profile = {
 
 /** The signed-in user's profile, or null. Verified against Supabase on every request. */
 export const getProfile = cache(async (): Promise<Profile | null> => {
-  await cookies(); // always a per-request read, so signed-in pages are never prerendered
+  await connection(); // always a per-request read, so signed-in pages are never prerendered
   if (!supabaseConfigured) return null;
   const supabase = await createClient();
   const { data: auth } = await supabase.auth.getUser();
