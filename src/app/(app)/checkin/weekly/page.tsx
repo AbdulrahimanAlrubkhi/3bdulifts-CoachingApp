@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { requireProfile } from "@/lib/auth";
-import { MEASUREMENTS, PHOTO_BUCKET, POSES, REFLECTIONS } from "@/lib/checkins";
+import { MEASUREMENTS, PHOTO_BUCKET, PHOTO_LINK_SECONDS, POSES, REFLECTIONS } from "@/lib/checkins";
 import { formatDay, isISODate, todayISO, weekStartOf } from "@/lib/dates";
 import { getT } from "@/lib/i18n";
 import type { TKey } from "@/lib/i18n/dictionaries";
@@ -50,7 +50,7 @@ export default async function WeeklyCheckinPage({ searchParams }: PageProps<"/ch
 
   // private bucket: photos are shown through signed links that expire after an hour
   const paths = POSES.map((p) => weekly?.[`photo_${p}`]).filter((p): p is string => Boolean(p));
-  const { data: signed } = paths.length ? await supabase.storage.from(PHOTO_BUCKET).createSignedUrls(paths, 3600) : { data: [] };
+  const { data: signed } = paths.length ? await supabase.storage.from(PHOTO_BUCKET).createSignedUrls(paths, PHOTO_LINK_SECONDS) : { data: [] };
   const urlFor = (path: string | null | undefined) => (path ? (signed ?? []).find((s) => s.path === path)?.signedUrl ?? null : null);
   const answers = weekly?.reflections ?? {};
   const dayFmt = { day: "numeric", month: "long" } as const;

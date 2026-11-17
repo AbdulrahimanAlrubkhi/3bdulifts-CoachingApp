@@ -32,7 +32,22 @@ const bad = clientMetrics({
 ok("bad: missed flag (3 days)", bad.flags.includes("missed") && bad.daysSinceCheckin === 3, bad);
 ok("bad: stalled flag", bad.flags.includes("stalled"), bad);
 ok("bad: low workout (2 of 8 = 25%)", bad.workoutPct === 25 && bad.flags.includes("lowWorkout"), bad.workoutPct);
-ok("bad: low nutrition (2/7 = 29%)", bad.nutritionPct === 29 && bad.flags.includes("lowNutrition"), bad.nutritionPct);
+ok("bad: 2 logged days is too few to judge adherence", bad.nutritionPct === null && !bad.flags.includes("lowNutrition"), bad.nutritionPct);
+ok("bad: logged 2 of 7 days is flagged as rarely logging", bad.loggedDays === 2 && bad.targetDays === 7 && bad.flags.includes("lowLogging"), bad);
+
+// missing days are unknown, not failures: 4 logged days all on target = 100%, even with 3 days unlogged
+const partial = clientMetrics({
+  today, startDate: "2026-10-01", trainingDays: 3, weighIns: [], checkinDates: days(7), workoutDates: days(6),
+  nutritionDays: days(4, 1).map((d) => ({ date: d, calories: 2000, protein_g: 150 })), targets: [cut],
+});
+ok("missing food logs don't count as off-target", partial.nutritionPct === 100 && partial.loggedDays === 4, partial);
+ok("4 of 7 days logged is not 'rarely logging'", !partial.flags.includes("lowLogging"), partial.flags);
+// logged days that really are off target do count
+const over = clientMetrics({
+  today, startDate: "2026-10-01", trainingDays: 3, weighIns: [], checkinDates: days(7), workoutDates: days(6),
+  nutritionDays: days(5, 1).map((d, i) => ({ date: d, calories: i < 4 ? 2600 : 2000, protein_g: 150 })), targets: [cut],
+});
+ok("4 of 5 logged days over target = 20% and flagged", over.nutritionPct === 20 && over.flags.includes("lowNutrition"), over);
 
 // 3. flat weight on maintenance is the goal, not a stall
 const maintain = clientMetrics({ ...{ today, startDate: "2026-10-01", trainingDays: 3, checkinDates: days(21), workoutDates: days(6), nutritionDays: [] },

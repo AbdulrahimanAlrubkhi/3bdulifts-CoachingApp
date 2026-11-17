@@ -1,4 +1,4 @@
-import { PHOTO_BUCKET, POSES } from "@/lib/checkins";
+import { PHOTO_BUCKET, PHOTO_LINK_SECONDS, POSES } from "@/lib/checkins";
 import { formatDay } from "@/lib/dates";
 import type { TKey } from "@/lib/i18n/dictionaries";
 import { createClient } from "@/lib/supabase/server";
@@ -30,7 +30,7 @@ export async function PhotosTab({ clientId, t, locale, sp }: TabProps) {
   const a = pick(sp.a, weeks[0]);
   const b = pick(sp.b, weeks.at(-1)!);
   const paths = [a, b].flatMap((w) => POSES.map((p) => w[`photo_${p}`])).filter((p): p is string => Boolean(p));
-  const { data: signed } = await supabase.storage.from(PHOTO_BUCKET).createSignedUrls([...new Set(paths)], 3600);
+  const { data: signed } = await supabase.storage.from(PHOTO_BUCKET).createSignedUrls([...new Set(paths)], PHOTO_LINK_SECONDS);
   const url = (path: string | null) => (path ? (signed ?? []).find((s) => s.path === path)?.signedUrl ?? null : null);
   const label = (w: PhotoWeek) => formatDay(w.week_start, locale, { day: "numeric", month: "short", year: "numeric" });
 

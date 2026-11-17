@@ -29,12 +29,13 @@ export async function NutritionTab({ clientId, t }: TabProps) {
   const series = (key: "calories" | "protein_g" | "carbs_g" | "fat_g") =>
     days.map((d) => ({ label: String(Number(d.slice(8))), value: byDay.has(d) ? Math.round(Number(byDay.get(d)![key])) : null }));
 
-  // full days only: today is still being logged
-  const judged = days.filter((d) => d < today && targetFor(targets, d));
+  // full days only (today is still being logged); a day with nothing logged is unknown, not a miss
+  const targetDays = days.filter((d) => d < today && targetFor(targets, d));
+  const judged = targetDays.filter((d) => byDay.has(d));
   const onTarget = judged.filter((d) => {
-    const r = byDay.get(d);
-    const totals = { calories: Number(r?.calories ?? 0), protein_g: Number(r?.protein_g ?? 0), carbs_g: 0, fat_g: 0, fiber_g: 0 };
-    return nutritionStatus(totals, targetFor(targets, d), Boolean(r)).status === "on";
+    const r = byDay.get(d)!;
+    const totals = { calories: Number(r.calories), protein_g: Number(r.protein_g), carbs_g: 0, fat_g: 0, fiber_g: 0 };
+    return nutritionStatus(totals, targetFor(targets, d), true).status === "on";
   }).length;
 
   const charts: [string, "calories" | "protein_g" | "carbs_g" | "fat_g", number | null, string][] = [
@@ -49,9 +50,10 @@ export async function NutritionTab({ clientId, t }: TabProps) {
       <Card>
         <p className="mb-3 text-sm">
           {t("cc.last14")} ·{" "}
-          {judged.length ? (
+          {targetDays.length ? (
             <>
-              <span className="num">{`${onTarget}/${judged.length}`}</span> {t("cc.daysOnTarget")}
+              <span className="num">{`${judged.length}/${targetDays.length}`}</span> {t("cc.loggedDays")} ·{" "}
+              <span className="num">{`${onTarget}/${judged.length}`}</span> {t("cc.onTargetOfLogged")}
             </>
           ) : (
             <span className="text-muted">{t("n.noTarget")}</span>

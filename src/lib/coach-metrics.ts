@@ -14,11 +14,15 @@ export const FLAG_RULES = {
   /** flag below these adherence percentages */
   lowWorkoutPct: 60,
   lowNutritionPct: 50,
+  /** judge nutrition adherence only once at least this many of the last 7 days were logged */
+  minLoggedDays: 3,
+  /** flag a client who logged food on fewer than half of the days that had a target */
+  lowLoggingShare: 0.5,
   /** used when a client hasn't said how many days a week they train */
   defaultTrainingDays: 3,
 };
 
-export type Flag = "missed" | "stalled" | "lowWorkout" | "lowNutrition";
+export type Flag = "missed" | "stalled" | "lowWorkout" | "lowNutrition" | "lowLogging";
 
 export type MetricsInput = {
   today: string;
@@ -37,7 +41,11 @@ export type ClientMetrics = {
   avg7: number | null; // kg, last 7 days including today
   trendKgPerWeek: number | null; // this week's average minus last week's
   workoutPct: number | null;
+  /** share of LOGGED days on target; null when too few days were logged to judge */
   nutritionPct: number | null;
+  /** days with any food logged, out of days that had a target (last 7 full days) */
+  loggedDays: number;
+  targetDays: number;
   phase: Target["phase"] | null;
   flags: Flag[];
 };
@@ -77,21 +85,26 @@ export function clientMetrics(input: MetricsInput): ClientMetrics {
   const done = input.workoutDates.filter((d) => d > addDays(today, -14) && d <= today).length;
   const workoutPct = planned >= 1 ? Math.min(100, Math.round((done / planned) * 100)) : null;
 
-  // nutrition: share of the last 7 full days (today is still in progress) that were on target
+  // nutrition: of the last 7 full days (today is still in progress) that had a target, how many
+  // were logged, and of those, how many were on target. A day with nothing logged is "unknown",
+  // never "ate nothing" and never "missed the target".
   const byDay = new Map(input.nutritionDays.map((d) => [d.date, d]));
-  let eligible = 0;
+  let targetDays = 0;
+  let loggedDays = 0;
   let onTarget = 0;
   for (let i = 1; i <= 7; i++) {
     const date = addDays(today, -i);
     if (date < startDate) continue;
     const target = targetFor(input.targets, date);
     if (!target) continue;
-    eligible++;
+    targetDays++;
     const day = byDay.get(date);
-    const totals = { calories: day?.calories ?? 0, protein_g: day?.protein_g ?? 0, carbs_g: 0, fat_g: 0, fiber_g: 0 };
-    if (nutritionStatus(totals, target, Boolean(day)).status === "on") onTarget++;
+    if (!day) continue;
+    loggedDays++;
+    const totals = { calories: day.calories, protein_g: day.protein_g, carbs_g: 0, fat_g: 0, fiber_g: 0 };
+    if (nutritionStatus(totals, target, true).status === "on") onTarget++;
   }
-  const nutritionPct = eligible ? Math.round((onTarget / eligible) * 100) : null;
+  const nutritionPct = loggedDays >= FLAG_RULES.minLoggedDays ? Math.round((onTarget / loggedDays) * 100) : null;
 
   const phase = targetFor(input.targets, today)?.phase ?? null;
   const flags: Flag[] = [];
@@ -107,6 +120,8 @@ export function clientMetrics(input: MetricsInput): ClientMetrics {
   }
   if (workoutPct != null && workoutPct < FLAG_RULES.lowWorkoutPct) flags.push("lowWorkout");
   if (nutritionPct != null && nutritionPct < FLAG_RULES.lowNutritionPct) flags.push("lowNutrition");
+  // judged on at least 4 days with a target, so a new client isn't flagged on day two
+  if (targetDays >= 4 && loggedDays / targetDays < FLAG_RULES.lowLoggingShare) flags.push("lowLogging");
 
   return {
     lastCheckin,
@@ -115,6 +130,8 @@ export function clientMetrics(input: MetricsInput): ClientMetrics {
     trendKgPerWeek,
     workoutPct,
     nutritionPct,
+    loggedDays,
+    targetDays,
     phase,
     flags,
   };

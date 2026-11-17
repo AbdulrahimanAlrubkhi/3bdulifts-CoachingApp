@@ -99,6 +99,17 @@ export async function logMealOption(formData: FormData) {
   const date = String(formData.get("date"));
   if (!isISODate(date)) return;
   const supabase = await createClient();
+  // a double tap or a retry must not log the same option twice for the same day
+  const { count } = await supabase
+    .from("food_logs")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", profile.id)
+    .eq("log_date", date)
+    .eq("meal_option_id", optionId);
+  if (count) {
+    refresh();
+    return;
+  }
   const { data: option } = await supabase
     .from("meal_options")
     .select(`meal, meal_option_items(grams, foods(${FOOD_COLUMNS}))`)

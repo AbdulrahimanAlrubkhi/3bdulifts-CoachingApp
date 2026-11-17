@@ -59,10 +59,16 @@ export function currentSubscription<T extends Pick<Subscription, "start_date" | 
   return [...subs].sort((a, b) => b.end_date.localeCompare(a.end_date))[0] ?? null;
 }
 
-/** CSV with a byte-order mark so Excel opens Arabic text correctly. */
+/**
+ * CSV with a byte-order mark so Excel opens Arabic text correctly.
+ * Text a client typed (notes, food names) that starts with = + - @ or a tab could run as a formula
+ * when the file is opened in Excel or Sheets, so such cells get a leading apostrophe. Real numbers,
+ * including negatives like -3.6, are left alone.
+ */
 export function toCsv(header: string[], rows: (string | number | null | undefined)[][]) {
   const cell = (v: string | number | null | undefined) => {
-    const s = v == null ? "" : String(v);
+    let s = v == null ? "" : String(v);
+    if (typeof v === "string" && /^[=+\-@\t\r]/.test(s) && !/^-?\d+(\.\d+)?$/.test(s)) s = "'" + s;
     return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
   };
   return "﻿" + [header, ...rows].map((r) => r.map(cell).join(",")).join("\r\n") + "\r\n";

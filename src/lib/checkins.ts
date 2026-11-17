@@ -10,6 +10,8 @@ export const POSES = ["front", "side", "back"] as const;
 export type Pose = (typeof POSES)[number];
 
 export const PHOTO_BUCKET = "progress-photos";
+/** How long a link to a private photo works. Long enough to look at a page, short enough that a copied link soon expires. */
+export const PHOTO_LINK_SECONDS = 600;
 
 /** Storage path for a progress photo. The first folder must be the user's id (storage policy). */
 export function photoPath(userId: string, weekStart: string, pose: Pose) {
@@ -54,9 +56,11 @@ export function normalizeDaily(row: DailyCheckin): DailyCheckin {
  */
 export function nutritionStatus(totals: Macros, target: Target | null, logged: boolean) {
   if (!target || !logged) return { status: "none" as const, calPct: null, proteinPct: null };
-  const calPct = Math.round((totals.calories / target.calories) * 100);
-  const proteinPct = Math.round((totals.protein_g / target.protein_g) * 100);
-  const status =
-    calPct > 110 ? ("over" as const) : calPct >= 90 && proteinPct >= 90 ? ("on" as const) : ("under" as const);
+  // compare the exact ratios; rounding first would let 110.05% count as "within 10%"
+  const cal = totals.calories / target.calories;
+  const protein = totals.protein_g / target.protein_g;
+  const status = cal > 1.1 ? ("over" as const) : cal >= 0.9 && protein >= 0.9 ? ("on" as const) : ("under" as const);
+  const calPct = Math.round(cal * 100);
+  const proteinPct = Math.round(protein * 100);
   return { status, calPct, proteinPct };
 }

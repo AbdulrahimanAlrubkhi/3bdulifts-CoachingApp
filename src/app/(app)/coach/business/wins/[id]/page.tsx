@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { requireCoach } from "@/lib/auth";
-import { PHOTO_BUCKET } from "@/lib/checkins";
+import { PHOTO_BUCKET, PHOTO_LINK_SECONDS } from "@/lib/checkins";
 import { weightSeries } from "@/lib/coach-metrics";
 import { daysBetween, todayISO } from "@/lib/dates";
 import { getT } from "@/lib/i18n";
@@ -46,7 +46,7 @@ export default async function WinFormPage({ params, searchParams }: PageProps<"/
   }
 
   const paths = [win.before_photo, win.after_photo].filter((p): p is string => Boolean(p));
-  const { data: signed } = paths.length ? await supabase.storage.from(PHOTO_BUCKET).createSignedUrls(paths, 3600) : { data: [] };
+  const { data: signed } = paths.length ? await supabase.storage.from(PHOTO_BUCKET).createSignedUrls(paths, PHOTO_LINK_SECONDS) : { data: [] };
   const url = (p: string | null | undefined) => (p ? (signed ?? []).find((s) => s.path === p)?.signedUrl ?? null : null);
   const weightValue = (kg: number | null | undefined) => (kg == null ? "" : fmt(toDisplay(Number(kg), coach.unit)));
 

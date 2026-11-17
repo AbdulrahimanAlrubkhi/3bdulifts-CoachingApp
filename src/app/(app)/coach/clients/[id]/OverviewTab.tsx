@@ -7,7 +7,7 @@ import { kcal, targetOn } from "@/lib/nutrition";
 import { createClient } from "@/lib/supabase/server";
 import { fmt, toDisplay } from "@/lib/units";
 import { selectClass } from "@/components/ExerciseList";
-import { FlagChip, Pct, WeightAndTrend, lastCheckinText } from "@/components/MetricBits";
+import { FlagChip, NutritionPct, Pct, WeightAndTrend, lastCheckinText } from "@/components/MetricBits";
 import { Card, Field, accentButtonClass, buttonClass, ghostButtonClass, inputClass } from "@/components/ui";
 import { saveClientProfile } from "./actions";
 import type { TabProps } from "./tab-props";
@@ -41,7 +41,7 @@ export async function OverviewTab({ clientId, client, name, t, unit }: TabProps)
           {tile(t("cc.lastCheckin"), lastCheckinText(m, t), m.flags.includes("missed"))}
           {tile(t("cc.avg7"), <WeightAndTrend m={m} unit={unit} t={t} />)}
           {tile(t("cc.workouts"), <Pct value={m.workoutPct} />, m.flags.includes("lowWorkout"))}
-          {tile(t("cc.nutrition"), <Pct value={m.nutritionPct} />, m.flags.includes("lowNutrition"))}
+          {tile(t("cc.nutrition"), <NutritionPct m={m} t={t} />, m.flags.includes("lowNutrition"))}
         </dl>
       </Card>
 

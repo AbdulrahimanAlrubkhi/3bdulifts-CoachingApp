@@ -4,7 +4,7 @@ import { loadClientMetrics } from "@/lib/coach-data";
 import type { ClientMetrics } from "@/lib/coach-metrics";
 import { getT } from "@/lib/i18n";
 import { createClient } from "@/lib/supabase/server";
-import { FlagChip, Pct, WeightAndTrend, lastCheckinText } from "@/components/MetricBits";
+import { FlagChip, NutritionPct, Pct, WeightAndTrend, lastCheckinText } from "@/components/MetricBits";
 import { Card, PageTitle } from "@/components/ui";
 
 // Coach dashboard (spec #15): every client at a glance, clients with flags first.
@@ -56,7 +56,7 @@ export default async function CoachDashboard() {
                   <div>
                     <dt className="text-[11px] text-muted">{t("cc.nutrition")}</dt>
                     <dd className={m.flags.includes("lowNutrition") ? "text-danger" : ""}>
-                      <Pct value={m.nutritionPct} />
+                      <NutritionPct m={m} t={t} />
                     </dd>
                   </div>
                 </dl>

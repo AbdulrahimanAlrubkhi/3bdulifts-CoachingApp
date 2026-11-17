@@ -45,3 +45,17 @@ export function WeightAndTrend({ m, unit, t }: { m: ClientMetrics; unit: Unit; t
 export function Pct({ value }: { value: number | null }) {
   return value == null ? <span className="text-muted">–</span> : <span className="num">{value}%</span>;
 }
+
+/** Nutrition adherence with how much it rests on: "80%" over "4/7 days logged". */
+export function NutritionPct({ m, t }: { m: ClientMetrics; t: T }) {
+  return (
+    <span>
+      <Pct value={m.nutritionPct} />
+      {m.targetDays > 0 && (
+        <span className="block text-xs text-muted">
+          <span className="num">{`${m.loggedDays}/${m.targetDays}`}</span> {t("cc.loggedDays")}
+        </span>
+      )}
+    </span>
+  );
+}

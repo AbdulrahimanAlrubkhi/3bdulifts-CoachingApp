@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { requireCoach } from "@/lib/auth";
-import { PHOTO_BUCKET } from "@/lib/checkins";
+import { PHOTO_BUCKET, PHOTO_LINK_SECONDS } from "@/lib/checkins";
 import { getT } from "@/lib/i18n";
 import { createClient } from "@/lib/supabase/server";
 import { fmt, toDisplay } from "@/lib/units";
@@ -32,7 +32,7 @@ export default async function WinsPage() {
     .order("created_at", { ascending: false });
   const wins = (data ?? []) as unknown as Win[];
   const paths = wins.flatMap((w) => [w.before_photo, w.after_photo]).filter((p): p is string => Boolean(p));
-  const { data: signed } = paths.length ? await supabase.storage.from(PHOTO_BUCKET).createSignedUrls([...new Set(paths)], 3600) : { data: [] };
+  const { data: signed } = paths.length ? await supabase.storage.from(PHOTO_BUCKET).createSignedUrls([...new Set(paths)], PHOTO_LINK_SECONDS) : { data: [] };
   const url = (p: string | null) => (p ? (signed ?? []).find((s) => s.path === p)?.signedUrl ?? null : null);
   const w = (kg: number | null) => (kg == null ? null : fmt(toDisplay(Number(kg), coach.unit)));
 
