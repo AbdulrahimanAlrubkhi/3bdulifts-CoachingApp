@@ -15,6 +15,8 @@ export default async function CoachLibraryPage() {
           [
             ["/workouts", "w.routines"],
             ["/workouts/exercises", "w.library"],
+            ["/coach/library/meal-plans", "n.plans"],
+            ["/coach/library/foods", "n.foods"],
           ] as const
         ).map(([href, key]) => (
           <li key={href}>
@@ -23,7 +25,6 @@ export default async function CoachLibraryPage() {
             </Link>
           </li>
         ))}
-        {/* foods and meal plans join this list in step 2 */}
       </ul>
     </>
   );

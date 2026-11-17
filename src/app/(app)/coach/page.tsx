@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { requireCoach } from "@/lib/auth";
 import { getT } from "@/lib/i18n";
 import { createClient } from "@/lib/supabase/server";
@@ -28,12 +29,14 @@ export default async function CoachDashboard() {
         <ul className="space-y-2">
           {clients.map((client) => (
             <li key={client.id}>
-              <Card className="flex items-center justify-between">
-                <span className="text-[15px] font-medium">{client.full_name || "—"}</span>
-                <span className="text-xs text-muted">
-                  {t("coach.joined")} {dateFormat.format(new Date(client.created_at))}
-                </span>
-              </Card>
+              <Link href={`/coach/clients/${client.id}`}>
+                <Card className="flex items-center justify-between">
+                  <span className="text-[15px] font-medium">{client.full_name || "—"}</span>
+                  <span className="text-xs text-muted">
+                    {t("coach.joined")} {dateFormat.format(new Date(client.created_at))}
+                  </span>
+                </Card>
+              </Link>
             </li>
           ))}
         </ul>
