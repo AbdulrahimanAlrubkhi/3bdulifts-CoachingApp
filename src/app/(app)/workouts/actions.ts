@@ -6,6 +6,7 @@ import { requireCoach, requireProfile } from "@/lib/auth";
 import { getLocale } from "@/lib/i18n";
 import { dictionaries } from "@/lib/i18n/dictionaries";
 import { EQUIPMENT, MUSCLES } from "@/lib/exercise-meta";
+import { logError } from "@/lib/log";
 import { createClient } from "@/lib/supabase/server";
 
 // Every action runs as the signed-in user, so row-level security decides what it may touch.
@@ -157,12 +158,20 @@ export async function startWorkout(formData: FormData) {
     }
   }
 
-  const { data: workout } = await supabase
+  const { data: workout, error } = await supabase
     .from("workouts")
     .insert({ user_id: profile.id, routine_id: routineId, title })
     .select("id")
     .single();
-  if (!workout) redirect("/workouts");
+  if (!workout) {
+    // a double tap or a second tab got there first: the database allows one unfinished workout, so open it
+    if (error?.code === "23505") {
+      const { data: running } = await supabase.from("workouts").select("id").eq("user_id", profile.id).is("ended_at", null).maybeSingle();
+      if (running) redirect(`/workouts/live/${running.id}`);
+    }
+    logError("startWorkout", error);
+    redirect("/workouts");
+  }
 
   if (items.length) {
     const { data: rows } = await supabase

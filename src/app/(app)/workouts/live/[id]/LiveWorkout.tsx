@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Exercise } from "@/lib/exercise-meta";
 import { usePrefs } from "@/lib/i18n/client";
@@ -83,27 +83,141 @@ export function LiveWorkout({ workout, initialExercises, initialPrevious, target
     return !result.error;
   };
 
-  const editSet = (exerciseId: string, setId: string, change: Partial<LiveSet>) =>
-    setExercises((list) =>
-      list.map((e) =>
-        e.id !== exerciseId ? e : { ...e, sets: e.sets.map((s) => (s.id === setId ? { ...s, ...change } : s)) },
-      ),
-    );
+  // ───── autosave ─────
+  // Every edit goes into `pending` (and a copy on the phone), is sent about half a second after
+  // typing stops, and leaves `pending` only once the database has confirmed it. Failed sends retry
+  // with growing gaps, and straight away when the connection comes back. Nothing typed is lost to
+  // a refresh, a locked screen or a dropped connection.
+  const draftKey = `workout-draft:${workout.id}`;
+  const pending = useRef(new Map<string, LiveSet>());
+  const [saveState, setSaveState] = useState<"saved" | "saving" | "retrying">("saved");
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const sending = useRef(false);
+  const attempt = useRef(0);
 
-  const saveSet = async (set: LiveSet) => {
-    const weight = parseNum(set.weight);
-    const rpe = parseNum(set.rpe);
-    check(
-      await supabase
+  const persistDraft = useCallback(() => {
+    try {
+      if (pending.current.size) localStorage.setItem(draftKey, JSON.stringify([...pending.current.values()]));
+      else localStorage.removeItem(draftKey);
+    } catch {
+      // storage can be unavailable (private mode); the in-memory queue still works
+    }
+  }, [draftKey]);
+
+  const flush = useCallback(async function send(): Promise<boolean> {
+    if (timer.current) clearTimeout(timer.current);
+    timer.current = null;
+    if (sending.current) return false;
+    if (!pending.current.size) {
+      setSaveState("saved");
+      return true;
+    }
+    sending.current = true;
+    setSaveState("saving");
+    let allOk = true;
+    for (const [id, set] of [...pending.current]) {
+      const weight = parseNum(set.weight);
+      const reps = parseNum(set.reps);
+      const rpe = parseNum(set.rpe);
+      const { error } = await supabase
         .from("workout_sets")
         .update({
           weight_kg: weight == null ? null : toKg(weight, unit),
-          reps: parseNum(set.reps) == null ? null : Math.round(parseNum(set.reps)!),
+          reps: reps == null ? null : Math.round(reps),
           rpe: rpe == null ? null : Math.min(10, Math.max(1, rpe)),
           completed_at: set.completedAt,
         })
-        .eq("id", set.id),
+        .eq("id", id);
+      if (error) {
+        allOk = false;
+        break;
+      }
+      // only clear it if nothing newer was typed while this request was on its way
+      if (pending.current.get(id) === set) pending.current.delete(id);
+    }
+    sending.current = false;
+    persistDraft();
+    if (allOk && !pending.current.size) {
+      attempt.current = 0;
+      setSaveState("saved");
+      return true;
+    }
+    if (allOk) return send(); // more edits arrived meanwhile
+    setSaveState("retrying");
+    attempt.current += 1;
+    const wait = Math.min(30000, 2000 * 2 ** (attempt.current - 1));
+    timer.current = setTimeout(() => void send(), wait);
+    return false;
+  }, [supabase, unit, persistDraft]);
+
+  const queueSave = (set: LiveSet) => {
+    pending.current.set(set.id, set);
+    persistDraft();
+    setSaveState((s) => (s === "retrying" ? s : "saving"));
+    if (timer.current) clearTimeout(timer.current);
+    timer.current = setTimeout(() => void flush(), 600);
+  };
+
+  useEffect(() => {
+    // values typed before a refresh or crash that never reached the database: put them back and send them
+    try {
+      const saved = JSON.parse(localStorage.getItem(draftKey) ?? "[]") as LiveSet[];
+      if (saved.length) {
+        const byId = new Map(saved.map((s) => [s.id, s]));
+        // restoring from the phone's storage can only happen after the first render (the server has no storage)
+        setExercises((list) => list.map((e) => ({ ...e, sets: e.sets.map((s) => byId.get(s.id) ?? s) })));
+        for (const s of saved) pending.current.set(s.id, s);
+        void flush();
+      }
+    } catch {
+      // ignore an unreadable draft
+    }
+    const sendNow = () => void flush();
+    const onHide = () => {
+      if (document.visibilityState === "hidden") void flush();
+    };
+    const warn = (e: BeforeUnloadEvent) => {
+      if (pending.current.size) e.preventDefault();
+    };
+    window.addEventListener("online", sendNow);
+    document.addEventListener("visibilitychange", onHide);
+    window.addEventListener("beforeunload", warn);
+    return () => {
+      window.removeEventListener("online", sendNow);
+      document.removeEventListener("visibilitychange", onHide);
+      window.removeEventListener("beforeunload", warn);
+    };
+  }, [draftKey, flush]);
+
+  // the latest list, readable inside event handlers before React re-renders
+  const latest = useRef(exercises);
+  useEffect(() => {
+    latest.current = exercises;
+  }, [exercises]);
+
+  /** Change a set on screen and queue it for saving. */
+  const updateSet = (exerciseId: string, setId: string, change: Partial<LiveSet>) => {
+    const current = latest.current.find((e) => e.id === exerciseId)?.sets.find((s) => s.id === setId);
+    if (!current) return;
+    const updated: LiveSet = { ...current, ...change };
+    const next = latest.current.map((e) =>
+      e.id !== exerciseId ? e : { ...e, sets: e.sets.map((s) => (s.id === setId ? updated : s)) },
     );
+    latest.current = next;
+    setExercises(next);
+    queueSave(updated);
+  };
+
+  // one structural request at a time per button, so repeated taps don't add twice
+  const inFlight = useRef(new Set<string>());
+  const once = async (key: string, task: () => Promise<void>) => {
+    if (inFlight.current.has(key)) return;
+    inFlight.current.add(key);
+    try {
+      await task();
+    } finally {
+      inFlight.current.delete(key);
+    }
   };
 
   /** What to suggest for set number `index`: last session's numbers first, then the routine target. */
@@ -120,29 +234,27 @@ export function LiveWorkout({ workout, initialExercises, initialPrevious, target
 
   const toggleDone = (exercise: LiveExercise, set: LiveSet, index: number) => {
     if (set.completedAt) {
-      const next = { ...set, completedAt: null };
-      editSet(exercise.id, set.id, next);
-      void saveSet(next);
+      updateSet(exercise.id, set.id, { completedAt: null });
       return;
     }
     // ticking an empty set accepts the suggested numbers
     const suggestion = hint(exercise, index);
-    const next = {
-      ...set,
+    const change = {
       weight: set.weight || suggestion.weight,
       reps: set.reps || suggestion.reps,
       completedAt: new Date().toISOString(),
     };
-    if (parseNum(next.reps) == null) return; // nothing to log yet
-    editSet(exercise.id, set.id, next);
-    void saveSet(next);
+    if (parseNum(change.reps) == null) return; // nothing to log yet
+    updateSet(exercise.id, set.id, change);
     if (exercise.rest_seconds > 0 && now != null) {
       // `now` is at most half a second old, which is fine for a rest timer
       setRest({ endsAt: now + exercise.rest_seconds * 1000, total: exercise.rest_seconds });
     }
   };
 
-  const addSet = async (exercise: LiveExercise) => {
+  const addSet = (exercise: LiveExercise) => once(`add-set:${exercise.id}`, () => insertSet(exercise));
+
+  const insertSet = async (exercise: LiveExercise) => {
     const last = exercise.sets.at(-1);
     const weight = last ? parseNum(last.weight) : null;
     const result = await supabase
@@ -163,14 +275,22 @@ export function LiveWorkout({ workout, initialExercises, initialPrevious, target
   const removeSet = async (exercise: LiveExercise, set: LiveSet) => {
     // an empty set goes straight away; one with numbers in it asks first
     if ((set.completedAt || set.weight || set.reps) && !window.confirm(t("w.confirmDelete"))) return;
-    if (!check(await supabase.from("workout_sets").delete().eq("id", set.id))) return;
-    setExercises((list) =>
-      list.map((e) => (e.id === exercise.id ? { ...e, sets: e.sets.filter((s) => s.id !== set.id) } : e)),
-    );
+    await once(`remove-set:${set.id}`, async () => {
+      if (!check(await supabase.from("workout_sets").delete().eq("id", set.id))) return;
+      pending.current.delete(set.id);
+      persistDraft();
+      setExercises((list) =>
+        list.map((e) => (e.id === exercise.id ? { ...e, sets: e.sets.filter((s) => s.id !== set.id) } : e)),
+      );
+    });
   };
 
-  const addExercise = async (picked: Exercise) => {
+  const addExercise = (picked: Exercise) => {
     setPicking(false);
+    return once("add-exercise", () => insertExercise(picked));
+  };
+
+  const insertExercise = async (picked: Exercise) => {
     const result = await supabase
       .from("workout_exercises")
       .insert({ workout_id: workout.id, user_id: userId, exercise_id: picked.id, position: exercises.length })
@@ -187,7 +307,7 @@ export function LiveWorkout({ workout, initialExercises, initialPrevious, target
     };
     setExercises((list) => [...list, added]);
     setPrevious({ ...previous, ...(await fetchPrevious(supabase, userId, [picked.id], workout.id)) });
-    await addSet(added);
+    await insertSet(added);
   };
 
   const removeExercise = async (exercise: LiveExercise) => {
@@ -197,7 +317,14 @@ export function LiveWorkout({ workout, initialExercises, initialPrevious, target
   };
 
   const finish = async () => {
+    if (busy) return;
     setBusy(true);
+    // everything typed must be in the database before the workout is closed
+    if (!(await flush())) {
+      setFailed(true);
+      setBusy(false);
+      return;
+    }
     // nothing logged at all: there is nothing to keep, so it is removed rather than saved empty
     if (!exercises.some((e) => e.sets.some((s) => s.completedAt))) {
       const ok = check(await supabase.from("workouts").delete().eq("id", workout.id));
@@ -212,8 +339,12 @@ export function LiveWorkout({ workout, initialExercises, initialPrevious, target
     const empty = exercises.filter((e) => !e.sets.some((s) => s.completedAt)).map((e) => e.id);
     if (empty.length) await supabase.from("workout_exercises").delete().in("id", empty);
     const ok = check(await supabase.from("workouts").update({ ended_at: new Date().toISOString() }).eq("id", workout.id));
-    if (ok) router.push(`/workouts/history/${workout.id}`);
-    else setBusy(false);
+    if (ok) {
+      try {
+        localStorage.removeItem(draftKey);
+      } catch {}
+      router.push(`/workouts/history/${workout.id}`);
+    } else setBusy(false);
   };
 
   const discard = async () => {
@@ -235,6 +366,10 @@ export function LiveWorkout({ workout, initialExercises, initialPrevious, target
         </span>
       </div>
 
+      {/* always say whether the numbers on screen are safely stored */}
+      <p className={`mb-3 text-xs ${saveState === "retrying" ? "text-danger" : "text-muted"}`} role="status" aria-live="polite">
+        {saveState === "saved" ? `✓ ${t("w.allSaved")}` : saveState === "saving" ? `${t("w.saving")}…` : t("w.notSavedRetrying")}
+      </p>
       {failed && <p className="mb-3 text-sm text-danger" role="alert">{t("w.saveFailed")}</p>}
 
       <div className="space-y-3">
@@ -266,8 +401,8 @@ export function LiveWorkout({ workout, initialExercises, initialPrevious, target
                     aria-label={label}
                     value={set[key]}
                     placeholder={placeholder}
-                    onChange={(e) => editSet(exercise.id, set.id, { [key]: e.target.value })}
-                    onBlur={() => void saveSet(set)}
+                    onChange={(e) => updateSet(exercise.id, set.id, { [key]: e.target.value })}
+                    onBlur={() => void flush()}
                     className={`${cell} num ${done ? "border-transparent bg-transparent" : ""}`}
                   />
                 );
