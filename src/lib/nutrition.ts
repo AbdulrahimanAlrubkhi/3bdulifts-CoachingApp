@@ -22,10 +22,12 @@ export type Food = {
   serving_ar: string | null;
   serving_en: string | null;
   is_global: boolean;
+  /** a typical value for a dish or regional product; real recipes and brands vary */
+  is_estimate: boolean;
 };
 
 export const FOOD_COLUMNS =
-  "id, name_ar, name_en, category, kcal_100g, protein_100g, carbs_100g, fat_100g, fiber_100g, serving_g, serving_ar, serving_en, is_global";
+  "id, name_ar, name_en, category, kcal_100g, protein_100g, carbs_100g, fat_100g, fiber_100g, serving_g, serving_ar, serving_en, is_global, is_estimate";
 
 export const FOOD_CATEGORIES = [
   "grains", "protein", "dairy", "legumes", "vegetables", "fruit", "nuts", "fats", "sweets", "drinks", "dishes", "fast_food",

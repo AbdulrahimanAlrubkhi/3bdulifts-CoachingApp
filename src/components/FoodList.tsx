@@ -55,7 +55,14 @@ export function FoodList({
             {row(
               food,
               <>
-                <span className="min-w-0 truncate text-[15px]">{name(food)}</span>
+                <span className="min-w-0 truncate text-[15px]">
+                  {name(food)}
+                  {food.is_estimate && (
+                    <span className="ms-1.5 text-xs text-muted" title={t("n.estimateHint")}>
+                      ≈ {t("n.estimate")}
+                    </span>
+                  )}
+                </span>
                 <span className="shrink-0 text-xs text-muted">
                   <span className="num">{kcal(food.kcal_100g)}</span> {t("n.kcal")} / <span className="num">100</span>
                   {t("n.g")}

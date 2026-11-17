@@ -80,6 +80,7 @@ export async function saveFood(formData: FormData) {
     serving_g: num(formData.get("serving_g")),
     serving_ar: text(formData.get("serving_ar")),
     serving_en: text(formData.get("serving_en")),
+    is_estimate: formData.get("is_estimate") === "on",
   };
 
   const supabase = await createClient();

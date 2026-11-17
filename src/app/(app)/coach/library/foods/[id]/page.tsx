@@ -74,6 +74,13 @@ export default async function FoodFormPage({ params, searchParams }: PageProps<"
               <input name="serving_en" defaultValue={food?.serving_en ?? ""} dir="ltr" className={inputClass} />
             </Field>
           </div>
+          <label className="flex items-start gap-2 text-sm">
+            <input type="checkbox" name="is_estimate" defaultChecked={food?.is_estimate ?? false} className="mt-0.5 h-5 w-5 shrink-0 accent-(--accent)" />
+            <span>
+              ≈ {t("n.estimate")}
+              <span className="block text-xs text-muted">{t("n.estimateHint")}</span>
+            </span>
+          </label>
           <button className={buttonClass}>{t("w.save")}</button>
         </form>
       </Card>
