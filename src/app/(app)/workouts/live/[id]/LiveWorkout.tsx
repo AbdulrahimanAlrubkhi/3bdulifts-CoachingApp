@@ -61,19 +61,22 @@ export function LiveWorkout({ workout, initialExercises, initialPrevious, target
   const [now, setNow] = useState<number | null>(null);
   const [rest, setRest] = useState<{ endsAt: number; total: number } | null>(null);
   useEffect(() => {
-    const tick = () => setNow(Date.now());
+    const tick = () => {
+      const t = Date.now();
+      setNow(t);
+      // the rest countdown ends on the tick that passes its end time
+      setRest((r) => {
+        if (!r || r.endsAt > t) return r;
+        navigator.vibrate?.(300);
+        return null;
+      });
+    };
     tick();
     const timer = setInterval(tick, 500);
     return () => clearInterval(timer);
   }, []);
 
-  const restLeft = rest && now != null ? (rest.endsAt - now) / 1000 : 0;
-  useEffect(() => {
-    if (rest && restLeft <= 0) {
-      navigator.vibrate?.(300);
-      setRest(null);
-    }
-  }, [rest, restLeft]);
+  const restLeft = rest && now != null ? Math.max(0, (rest.endsAt - now) / 1000) : 0;
 
   const check = (result: { error: unknown }) => {
     setFailed(Boolean(result.error));
@@ -133,8 +136,9 @@ export function LiveWorkout({ workout, initialExercises, initialPrevious, target
     if (parseNum(next.reps) == null) return; // nothing to log yet
     editSet(exercise.id, set.id, next);
     void saveSet(next);
-    if (exercise.rest_seconds > 0) {
-      setRest({ endsAt: Date.now() + exercise.rest_seconds * 1000, total: exercise.rest_seconds });
+    if (exercise.rest_seconds > 0 && now != null) {
+      // `now` is at most half a second old, which is fine for a rest timer
+      setRest({ endsAt: now + exercise.rest_seconds * 1000, total: exercise.rest_seconds });
     }
   };
 
