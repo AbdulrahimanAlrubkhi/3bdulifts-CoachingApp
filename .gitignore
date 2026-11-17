@@ -42,3 +42,7 @@ next-env.d.ts
 !.env.example
 supabase/local-test-accounts.txt
 /.next-check/
+
+# Supabase CLI local state
+supabase/.temp/
+supabase/.branches/
