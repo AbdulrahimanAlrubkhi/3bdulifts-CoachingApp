@@ -17,7 +17,7 @@ Bottom tab bar: Today · Workouts · Nutrition · Check-in · More
 | Route | Page | Spec # | Status |
 |---|---|---|---|
 | `/onboarding` | Onboarding questionnaire (shown once after sign-up) | 14 | step 4 |
-| `/today` | Today: assigned workout, macros left, check-in status, latest coach feedback, renewal reminder | 9, 17, 18 | workouts + macros built; rest per step |
+| `/today` | Today: assigned workout, macros left, check-in status, latest coach feedback, renewal reminder | 9, 17, 18 | workouts, macros, check-in status built; feedback + renewal in steps 4–5 |
 | `/workouts` | Routines (mine + assigned by coach), start workout | 2 | built |
 | `/workouts/routines/new`, `/workouts/routines/[id]` | Routine editor: add, reorder, targets, share link | 2 | built |
 | `/workouts/live/[id]` | Live logging: weight/reps/RPE per set, rest timer, previous numbers | 3 | built |
@@ -28,8 +28,8 @@ Bottom tab bar: Today · Workouts · Nutrition · Check-in · More
 | `/nutrition/add` | Add food: search database, saved foods, quick-add | 7, 10 | built |
 | `/nutrition/plan` | Pick meal-plan options; they log automatically | 8 | built |
 | `/nutrition/week` | Weekly averages | 9 | built |
-| `/checkin` | Daily check-in | 11 | step 3 |
-| `/checkin/weekly` | Weekly check-in: measurements, photos, reflection | 12 | step 3 |
+| `/checkin` | Daily check-in | 11 | built |
+| `/checkin/weekly` | Weekly check-in: measurements, photos, reflection | 12 | built |
 | `/more` | Feedback from coach, challenges, subscription, settings | 17, 18, 19 | built (settings); rest per step |
 | `/more/feedback` | Weekly feedback history | 17 | step 4 |
 | `/more/challenges/[id]` | Challenge leaderboard | 19 | step 5 |
@@ -57,7 +57,7 @@ Same shell, coach tab bar: Clients · Library · Business · More
 0. **Foundation** — schema, auth, roles, Arabic/English, dark/light, app shell *(done)*
 1. **Workouts** — spec 1–5, plus 50-exercise seed *(done)*
 2. **Nutrition** — spec 6–10, plus 166-food seed *(done)*
-3. **Check-ins** — spec 11–12
+3. **Check-ins** — spec 11–12 *(done)*
 4. **Coach core** — spec 13–17
 5. **Business** — spec 18–21
 6. **Deploy** — final README pass, Vercel

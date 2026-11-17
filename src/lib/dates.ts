@@ -1,6 +1,21 @@
 // Days are counted in Oman time, so "today" is the same for the coach and every client
 // no matter where the server runs.
 export const APP_TZ = "Asia/Muscat";
+/** Oman has no daylight saving, so its offset is fixed. Keep in step with APP_TZ. */
+export const APP_UTC_OFFSET = "+04:00";
+/** Weeks start on Sunday, the first working day in Oman (0 = Sunday … 6 = Saturday). */
+export const WEEK_START_DAY = 0;
+
+/** Start (inclusive) and end (exclusive) of a calendar day in Oman, as timestamps for queries. */
+export function dayBounds(iso: string): [string, string] {
+  return [`${iso}T00:00:00${APP_UTC_OFFSET}`, `${addDays(iso, 1)}T00:00:00${APP_UTC_OFFSET}`];
+}
+
+/** The first day of the week that `iso` falls in. */
+export function weekStartOf(iso: string): string {
+  const day = new Date(`${iso}T00:00:00Z`).getUTCDay();
+  return addDays(iso, -((day - WEEK_START_DAY + 7) % 7));
+}
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 

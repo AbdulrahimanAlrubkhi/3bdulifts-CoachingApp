@@ -9,7 +9,7 @@ Next.js 16 · TypeScript · Tailwind 4 · Supabase (Postgres, auth, storage) · 
 ## Setup (cloud Supabase)
 
 1. **Create a Supabase project** at supabase.com (the free tier is enough to start). Pick a region close to Oman, such as Mumbai or Frankfurt.
-2. **Create the database.** In Supabase open *SQL Editor* and run each file in `supabase/migrations/` once, in number order: `0001_schema.sql`, then `0002_seed_exercises.sql` (50 exercises) and `0003_seed_foods.sql` (166 foods, values per 100 g).
+2. **Create the database.** In Supabase open *SQL Editor* and run each file in `supabase/migrations/` once, in number order: `0001_schema.sql`, then `0002_seed_exercises.sql` (50 exercises) `0003_seed_foods.sql` (166 foods, values per 100 g) and `0004_photos_owner_writes.sql` (progress photos: only the client can change them, the coach can view).
 3. **Add the keys.** Copy `.env.example` to `.env.local` and fill in the project URL and the anon (publishable) key from *Project Settings → API*.
 4. **Run it.**
 
@@ -51,7 +51,7 @@ This starts a local database, applies everything in `supabase/migrations/`, and 
 
 - Every table has row-level security. A client can only read and write rows that carry their own user id; the coach can read everything. This is enforced by Postgres, not by the pages.
 - Coach-only tables (private notes, testimonials) are invisible to clients.
-- Progress photos sit in a private storage bucket, in a folder named after the client's user id.
+- Progress photos sit in a private storage bucket, in a folder named after the client's user id. Only that client can add, replace or delete them; the coach can view them. They are shown through links that expire after an hour.
 - Challenge leaderboards expose only a name, % weight change and consistency — never raw weights or photos.
 
 ## Project layout
@@ -68,4 +68,6 @@ src/app/(app)/         signed-in pages for client and coach
 ## Notes on the data
 
 - Food values are typical averages. Home-cooked Gulf dishes (machboos, harees, saloona…) vary a lot by recipe; edit them in *Library → Foods* to match what your clients actually eat.
+- Weeks start on Sunday (`WEEK_START_DAY` in `src/lib/dates.ts`).
+- A day counts as "on target" for nutrition when calories are within 10% of target and protein reaches 90% of it (`nutritionStatus` in `src/lib/checkins.ts`).
 - Days are counted in Oman time (Asia/Muscat), for every user, wherever the server runs. Change `APP_TZ` in `src/lib/dates.ts` if that ever needs to differ.
