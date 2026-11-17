@@ -5,7 +5,7 @@ import type { ClientMetrics } from "@/lib/coach-metrics";
 import { getT } from "@/lib/i18n";
 import { createClient } from "@/lib/supabase/server";
 import { FlagChip, NutritionPct, Pct, WeightAndTrend, lastCheckinText } from "@/components/MetricBits";
-import { Card, PageTitle, buttonClass, inputClass } from "@/components/ui";
+import { Card, PageTitle, buttonInlineClass, inputClass } from "@/components/ui";
 import { inviteClient, removeInvite } from "./client-admin-actions";
 
 // Coach dashboard (spec #15): every client at a glance, clients with flags first.
@@ -87,7 +87,7 @@ export default async function CoachDashboard({ searchParams }: PageProps<"/coach
           <p className="mt-0.5 mb-3 text-xs text-muted">{t("inv.hint")}</p>
           <form action={inviteClient} className="flex gap-2">
             <input name="email" type="email" required dir="ltr" placeholder="name@example.com" aria-label={t("auth.email")} className={inputClass} />
-            <button className={`${buttonClass} w-auto shrink-0`}>{t("inv.add")}</button>
+            <button className={`${buttonInlineClass}`}>{t("inv.add")}</button>
           </form>
           {waiting.length > 0 && (
             <ul className="mt-3 border-t border-line pt-2 text-sm">

@@ -3,8 +3,11 @@ import type { ReactNode } from "react";
 export const inputClass =
   "h-11 w-full rounded-md border border-line bg-surface px-3 text-[15px] text-text placeholder:text-muted outline-none focus:border-accent";
 
-export const buttonClass =
-  "h-11 w-full rounded-md bg-accent px-4 text-[15px] font-medium text-accent-ink transition-opacity hover:opacity-90 disabled:opacity-50";
+/** The same filled button sized to its text, for use next to an input or at the end of a row. */
+const buttonBase =
+  "h-11 rounded-md bg-accent px-4 text-[15px] font-medium text-accent-ink transition-opacity hover:opacity-90 disabled:opacity-50";
+export const buttonClass = `${buttonBase} w-full`;
+export const buttonInlineClass = `${buttonBase} shrink-0`;
 
 /** Outlined in the accent colour: the one action to take on a card. */
 export const accentButtonClass =

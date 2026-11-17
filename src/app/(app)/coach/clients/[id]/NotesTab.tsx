@@ -1,6 +1,6 @@
 import { formatDay, isISODate, todayISO, weekStartOf, addDays, dateInAppTz } from "@/lib/dates";
 import { createClient } from "@/lib/supabase/server";
-import { Card, buttonClass, ghostButtonClass, inputClass } from "@/components/ui";
+import { Card, buttonInlineClass, ghostButtonClass, inputClass } from "@/components/ui";
 import { addCoachNote, deleteCoachNote, saveFeedback } from "./actions";
 import type { TabProps } from "./tab-props";
 
@@ -47,7 +47,7 @@ export async function NotesTab({ clientId, t, locale, sp }: TabProps) {
           <textarea name="body" rows={6} defaultValue={current?.body ?? ""} className={`${inputClass} h-auto py-2`} />
           <div className="flex items-center justify-between gap-3">
             <span className="text-xs text-muted">{current ? (current.read_at ? `✓ ${t("cc.read")}` : t("cc.unread")) : ""}</span>
-            <button className={`${buttonClass} w-auto`}>{t("cc.sendFeedback")}</button>
+            <button className={`${buttonInlineClass}`}>{t("cc.sendFeedback")}</button>
           </div>
         </form>
         {(feedback ?? []).length > 0 && (
