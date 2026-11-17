@@ -194,6 +194,13 @@ export function LiveWorkout({ workout, initialExercises, initialPrevious, target
 
   const finish = async () => {
     setBusy(true);
+    // nothing logged at all: there is nothing to keep, so it is removed rather than saved empty
+    if (!exercises.some((e) => e.sets.some((s) => s.completedAt))) {
+      const ok = check(await supabase.from("workouts").delete().eq("id", workout.id));
+      if (ok) router.push("/workouts");
+      else setBusy(false);
+      return;
+    }
     // sets that were never ticked are dropped; only logged work is kept
     const unfinished = exercises.flatMap((e) => e.sets.filter((s) => !s.completedAt).map((s) => s.id));
     if (unfinished.length) await supabase.from("workout_sets").delete().in("id", unfinished);
