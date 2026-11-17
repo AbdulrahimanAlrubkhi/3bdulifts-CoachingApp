@@ -1,0 +1,66 @@
+@import "tailwindcss";
+
+/* Palette: near-black, off-white, one muted sage accent. Dark is the default. */
+:root,
+[data-theme="dark"] {
+  --bg: #0d0e0f;
+  --surface: #151718;
+  --line: #262a2b;
+  --text: #e8e6e1;
+  --muted: #8d908c;
+  --accent: #8fa694;
+  --accent-ink: #0d0e0f;
+  --danger: #c98f85;
+  color-scheme: dark;
+}
+
+[data-theme="light"] {
+  --bg: #f5f4f0;
+  --surface: #ffffff;
+  --line: #dddbd4;
+  --text: #17191a;
+  --muted: #696c68;
+  --accent: #4d6955;
+  --accent-ink: #ffffff;
+  --danger: #a5483c;
+  color-scheme: light;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-line: var(--line);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-danger: var(--danger);
+  --font-sans: var(--font-plex), system-ui, sans-serif;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+}
+
+/* numbers stay left-to-right and aligned in tables, logs and charts */
+.num {
+  font-variant-numeric: tabular-nums;
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+/* show an element only in one language or theme, without waiting for React */
+.only-ar,
+.only-en,
+.only-dark,
+.only-light {
+  display: none;
+}
+[lang="ar"] .only-ar,
+[lang="en"] .only-en,
+[data-theme="dark"] .only-dark,
+[data-theme="light"] .only-light {
+  display: inline;
+}
