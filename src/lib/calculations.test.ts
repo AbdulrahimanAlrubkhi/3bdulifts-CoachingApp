@@ -6,6 +6,7 @@ import { addDays, dateInAppTz, dayBounds, daysBetween, weekStartOf } from "./dat
 import { forGrams, sum, type Food, type Target } from "./nutrition";
 import { fmt, parseNum, toDisplay, toKg } from "./units";
 import { analyse, type SetStat } from "./workout-stats";
+import { matchesSearch } from "./search";
 
 let pass = 0;
 let fail = 0;
@@ -98,6 +99,13 @@ eq("formulas are neutralised, dates and numbers are not", cells, [
   "\"'=HYPERLINK(\"\"http://x\"\")\"", "'+cmd", "'-2+3", "'@SUM(A1)", "2026-10-13", "-3.6", "-3.6", "عادي", "\"has,comma\"",
 ]);
 eq("CSV starts with a byte-order mark for Excel", csv.charCodeAt(0), 0xfeff);
+
+// ───── Arabic-friendly search ─────
+eq("ارز finds أرز", matchesSearch("ارز", "أرز أبيض مطبوخ", "White rice, cooked"), true);
+eq("دجاجه finds دجاجة", matchesSearch("دجاجه", "صدر دجاجة", "x"), true);
+eq("words in any order", matchesSearch("مطبوخ ارز", "أرز أبيض مطبوخ", "x"), true);
+eq("English ignores case", matchesSearch("RICE", "x", "White rice"), true);
+eq("no false match", matchesSearch("سمك", "أرز", "rice"), false);
 
 console.log(`\n${pass}/${pass + fail} passed`);
 if (fail) process.exit(1);

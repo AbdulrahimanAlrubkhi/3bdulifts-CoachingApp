@@ -1,5 +1,6 @@
 "use client";
 
+import { matchesSearch } from "@/lib/search";
 import { useMemo, useState, type ReactNode } from "react";
 import { usePrefs } from "@/lib/i18n/client";
 import type { TKey } from "@/lib/i18n/dictionaries";
@@ -22,9 +23,9 @@ export function FoodList({
   const [category, setCategory] = useState("");
 
   const shown = useMemo(() => {
-    const q = query.trim().toLowerCase();
+    const q = query;
     return foods.filter(
-      (f) => (!category || f.category === category) && (!q || f.name_ar.includes(q) || f.name_en.toLowerCase().includes(q)),
+      (f) => (!category || f.category === category) && matchesSearch(q, f.name_ar, f.name_en),
     );
   }, [foods, query, category]);
 

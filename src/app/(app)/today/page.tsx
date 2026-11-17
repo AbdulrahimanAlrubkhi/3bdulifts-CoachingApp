@@ -69,8 +69,17 @@ export default async function TodayPage() {
         <Link href="/nutrition" className="block">
           <Card>
             <h2 className="mb-3 text-sm font-medium">{t("nav.nutrition")}</h2>
-            {!target && <p className="mb-3 text-sm text-muted">{t("n.noTarget")}</p>}
-            <MacroBars totals={totals} target={target} t={t} />
+            {!target && totals.calories === 0 ? (
+              // a new client: no plan yet and nothing logged, so say what to do instead of showing zeros
+              <p className="text-sm text-muted">
+                {t("n.noTarget")} <span className="text-accent">{t("n.startLogging")}</span>
+              </p>
+            ) : (
+              <>
+                {!target && <p className="mb-3 text-sm text-muted">{t("n.noTarget")}</p>}
+                <MacroBars totals={totals} target={target} t={t} />
+              </>
+            )}
           </Card>
         </Link>
         <Card>

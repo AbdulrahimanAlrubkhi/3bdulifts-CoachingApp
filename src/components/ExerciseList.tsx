@@ -1,5 +1,6 @@
 "use client";
 
+import { matchesSearch } from "@/lib/search";
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { EQUIPMENT, MUSCLES, type Exercise } from "@/lib/exercise-meta";
@@ -18,13 +19,13 @@ export function ExerciseList({ exercises, onPick }: { exercises: Exercise[]; onP
   const [equipment, setEquipment] = useState("");
 
   const shown = useMemo(() => {
-    const q = query.trim().toLowerCase();
+    const q = query;
     return exercises.filter(
       (e) =>
         (!muscle || e.muscle === muscle) &&
         (!equipment || e.equipment === equipment) &&
         // matches either language, whichever one is on screen
-        (!q || e.name_ar.includes(q) || e.name_en.toLowerCase().includes(q)),
+        matchesSearch(q, e.name_ar, e.name_en),
     );
   }, [exercises, query, muscle, equipment]);
 
