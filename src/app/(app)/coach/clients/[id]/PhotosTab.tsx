@@ -63,8 +63,8 @@ export async function PhotosTab({ clientId, t, locale, sp }: TabProps) {
       {POSES.map((pose) => (
         <Card key={pose} className="p-3">
           <h2 className="mb-2 text-sm font-medium">{t(`c.${pose}` as TKey)}</h2>
-          {/* always earlier on the left, later on the right, in both languages */}
-          <div className="grid grid-cols-2 gap-2" dir="ltr">
+          {/* earlier first in reading order: right in Arabic, left in English */}
+          <div className="grid grid-cols-2 gap-2">
             {[a, b].map((w, i) => {
               const src = url(w[`photo_${pose}`]);
               return (

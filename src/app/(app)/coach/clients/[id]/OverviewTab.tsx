@@ -8,7 +8,7 @@ import { createClient } from "@/lib/supabase/server";
 import { fmt, toDisplay } from "@/lib/units";
 import { selectClass } from "@/components/ExerciseList";
 import { FlagChip, Pct, WeightAndTrend, lastCheckinText } from "@/components/MetricBits";
-import { Card, Field, buttonClass, inputClass } from "@/components/ui";
+import { Card, Field, accentButtonClass, buttonClass, ghostButtonClass, inputClass } from "@/components/ui";
 import { saveClientProfile } from "./actions";
 import type { TabProps } from "./tab-props";
 
@@ -62,6 +62,38 @@ export async function OverviewTab({ clientId, client, name, t, unit }: TabProps)
         </Link>
         <Link href={`/coach/library/meal-plans?client=${clientId}`}>
           <Card className="h-full p-3 font-medium">{t("n.plans")}</Card>
+        </Link>
+      </div>
+
+      <Card>
+        <h2 className="mb-2 text-sm font-medium">{t("ex.title")}</h2>
+        <div className="flex flex-wrap gap-2 text-sm">
+          <a href={`/report/${clientId}`} target="_blank" rel="noreferrer" className={accentButtonClass + " inline-flex items-center"}>
+            {t("ex.report")}
+          </a>
+          {(
+            [
+              ["daily", "ex.daily"],
+              ["weekly", "ex.weekly"],
+              ["workouts", "ex.workouts"],
+              ["food", "ex.food"],
+              ["targets", "ex.targets"],
+            ] as const
+          ).map(([key, label]) => (
+            // plain links: the browser downloads the CSV file
+            <a key={key} href={`/coach/clients/${clientId}/export/${key}`} className={ghostButtonClass + " inline-flex items-center"}>
+              {t(label)} · CSV
+            </a>
+          ))}
+        </div>
+      </Card>
+
+      <div className="grid grid-cols-2 gap-2 text-sm">
+        <Link href={`/coach/business/subscriptions?client=${clientId}`}>
+          <Card className="h-full p-3 font-medium">{t("sub.title")}</Card>
+        </Link>
+        <Link href={`/coach/business/wins/new?client=${clientId}`}>
+          <Card className="h-full p-3 font-medium">{t("win.mark")}</Card>
         </Link>
       </div>
 

@@ -7,6 +7,7 @@ import { fmtWeight } from "@/lib/units";
 import { normalizeLog, sum, targetOn, type LogRow } from "@/lib/nutrition";
 import { createClient } from "@/lib/supabase/server";
 import { MacroBars } from "@/components/MacroBars";
+import { PlanStatus } from "@/components/PlanStatus";
 import { Card, PageTitle } from "@/components/ui";
 
 export default async function TodayPage() {
@@ -42,6 +43,8 @@ export default async function TodayPage() {
         {profile.full_name ? `${locale === "ar" ? "،" : ","} ${profile.full_name}` : ""}
       </PageTitle>
       <div className="space-y-3">
+        {/* renewal reminder: only appears when the plan is ending, ended or unpaid */}
+        <PlanStatus supabase={supabase} clientId={profile.id} t={t} locale={locale} onlyWhenDue />
         {feedback && (
           // the latest note from the coach comes first; the full text is one tap away
           <Link href="/more/feedback" className="block">

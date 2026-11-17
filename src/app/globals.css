@@ -64,3 +64,21 @@ body {
 [data-theme="light"] .only-light {
   display: inline;
 }
+
+/* printing (the PDF report) always uses the light palette, whatever the screen theme */
+@media print {
+  :root,
+  [data-theme] {
+    --bg: #ffffff;
+    --surface: #ffffff;
+    --line: #d9d7d0;
+    --text: #17191a;
+    --muted: #5e615d;
+    --accent: #4d6955;
+    --accent-ink: #ffffff;
+    --danger: #a5483c;
+  }
+  body {
+    print-color-adjust: exact;
+  }
+}
