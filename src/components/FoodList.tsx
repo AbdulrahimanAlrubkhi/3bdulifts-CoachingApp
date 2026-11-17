@@ -25,7 +25,7 @@ export function FoodList({
   const shown = useMemo(() => {
     const q = query;
     return foods.filter(
-      (f) => (!category || f.category === category) && matchesSearch(q, f.name_ar, f.name_en),
+      (f) => (!category || f.category === category) && matchesSearch(q, f.name_ar, f.name_en, f.aliases ?? ""),
     );
   }, [foods, query, category]);
 

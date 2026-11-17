@@ -81,10 +81,17 @@ export async function saveFood(formData: FormData) {
     serving_ar: text(formData.get("serving_ar")),
     serving_en: text(formData.get("serving_en")),
     is_estimate: formData.get("is_estimate") === "on",
+    aliases: text(formData.get("aliases")),
   };
 
   const supabase = await createClient();
-  if (id) await supabase.from("foods").update(row).eq("id", id);
+  if (id) {
+    // once the coach changes a value, it no longer matches the cited source
+    const { data: old } = await supabase.from("foods").select("kcal_100g, protein_100g, carbs_100g, fat_100g, fiber_100g").eq("id", id).maybeSingle();
+    const keys = ["kcal_100g", "protein_100g", "carbs_100g", "fat_100g", "fiber_100g"] as const;
+    const changed = !old || keys.some((k) => Number(old[k]) !== Number(row[k]));
+    await supabase.from("foods").update(changed ? { ...row, source: null } : row).eq("id", id);
+  }
   else await supabase.from("foods").insert({ ...row, is_global: true, created_by: profile.id });
   redirect("/coach/library/foods");
 }

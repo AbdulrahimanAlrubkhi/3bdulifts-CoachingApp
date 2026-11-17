@@ -7,7 +7,7 @@ Keep two separate environments: your **local** copy (Docker, synthetic test data
 
 ### 1.1 Supabase project
 1. Create a project on supabase.com in the region closest to Oman that's offered (usually Mumbai). Save the database password in your password manager.
-2. Create the database: run every file in `supabase/migrations/` **once, in number order** (`0001` … `0007`). Either paste each into *SQL Editor*, or from the project folder:
+2. Create the database: run every file in `supabase/migrations/` **once, in number order** (`0001` … `0008`). Either paste each into *SQL Editor*, or from the project folder:
 
    ```bash
    npx supabase login

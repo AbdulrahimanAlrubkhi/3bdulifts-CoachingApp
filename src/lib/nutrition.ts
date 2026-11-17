@@ -24,10 +24,14 @@ export type Food = {
   is_global: boolean;
   /** a typical value for a dish or regional product; real recipes and brands vary */
   is_estimate: boolean;
+  /** extra search words (dialect, other spellings); not shown */
+  aliases: string | null;
+  /** where the values come from, e.g. "USDA FoodData Central SR Legacy, FDC 169703: …"; null = coach-entered */
+  source: string | null;
 };
 
 export const FOOD_COLUMNS =
-  "id, name_ar, name_en, category, kcal_100g, protein_100g, carbs_100g, fat_100g, fiber_100g, serving_g, serving_ar, serving_en, is_global, is_estimate";
+  "id, name_ar, name_en, category, kcal_100g, protein_100g, carbs_100g, fat_100g, fiber_100g, serving_g, serving_ar, serving_en, is_global, is_estimate, aliases, source";
 
 export const FOOD_CATEGORIES = [
   "grains", "protein", "dairy", "legumes", "vegetables", "fruit", "nuts", "fats", "sweets", "drinks", "dishes", "fast_food",

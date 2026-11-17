@@ -1,7 +1,7 @@
 # Two-week pilot checklist (3–5 clients)
 
 ## Before day 1
-- [ ] Deployed with migrations `0001`–`0007`; SMTP configured; you are the coach (`DEPLOY.md` §1)
+- [ ] Deployed with migrations `0001`–`0008`; SMTP configured; you are the coach (`DEPLOY.md` §1)
 - [ ] Smoke test passed on **your own iPhone and an Android phone** (`DEPLOY.md` §1.5)
 - [ ] First backup taken and stored privately (`DEPLOY.md` §3.1)
 - [ ] Each client invited by email; each told: "photos and numbers are private to you and me; you choose separately in *More → Sharing my results* whether anything may be published"

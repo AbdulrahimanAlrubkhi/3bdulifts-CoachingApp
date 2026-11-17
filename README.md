@@ -12,7 +12,7 @@ Next.js 16 · TypeScript · Tailwind 4 · Supabase (Postgres, auth, storage) · 
 ## Setup (cloud Supabase)
 
 1. **Create a Supabase project** at supabase.com (the free tier is enough to start). Pick a region close to Oman, such as Mumbai or Frankfurt.
-2. **Create the database.** In Supabase open *SQL Editor* and run each file in `supabase/migrations/` once, in number order (`0001` … `0007`).
+2. **Create the database.** In Supabase open *SQL Editor* and run each file in `supabase/migrations/` once, in number order (`0001` … `0008`).
 3. **Add the keys.** Copy `.env.example` to `.env.local` and fill in the project URL and the anon (publishable) key from *Project Settings → API*.
 4. **Run it.**
 

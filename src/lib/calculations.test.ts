@@ -106,6 +106,9 @@ eq("دجاجه finds دجاجة", matchesSearch("دجاجه", "صدر دجاجة
 eq("words in any order", matchesSearch("مطبوخ ارز", "أرز أبيض مطبوخ", "x"), true);
 eq("English ignores case", matchesSearch("RICE", "x", "White rice"), true);
 eq("no false match", matchesSearch("سمك", "أرز", "rice"), false);
+eq("dialect alias finds rice", matchesSearch("عيش", "أرز أبيض مطبوخ", "White rice, cooked", "عيش رز"), true);
+eq("alias plus state word", matchesSearch("روبيان نيء", "روبيان نيء", "Shrimp, raw", "جمبري ربيان"), true);
+eq("cooked does not match raw", matchesSearch("مطبوخ", "روبيان نيء", "Shrimp, raw", "جمبري"), false);
 
 console.log(`\n${pass}/${pass + fail} passed`);
 if (fail) process.exit(1);
