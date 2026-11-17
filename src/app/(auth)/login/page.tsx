@@ -17,7 +17,9 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
       <p className="mt-1 text-sm text-muted">{t("auth.tagline")}</p>
 
       {!supabaseConfigured && <p className="mt-6 text-sm text-danger">{t("setup.missing")}</p>}
-      {params.error && <p className="mt-6 text-sm text-danger">{t("auth.error")}</p>}
+      {params.error && (
+        <p className="mt-6 text-sm text-danger">{params.error === "link" ? t("auth.linkError") : t("auth.error")}</p>
+      )}
       {params.notice === "confirm" && <p className="mt-6 text-sm text-accent">{t("auth.confirm")}</p>}
 
       <form action={login} className="mt-6 space-y-4">
@@ -31,6 +33,12 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
           {t("auth.login")}
         </button>
       </form>
+
+      <p className="mt-4 text-sm">
+        <Link href="/forgot" className="text-muted underline underline-offset-4 hover:text-text">
+          {t("auth.forgot")}
+        </Link>
+      </p>
 
       <p className="mt-6 text-sm text-muted">
         {t("auth.noAccount")}{" "}

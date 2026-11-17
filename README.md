@@ -5,6 +5,7 @@ Next.js 16 · TypeScript · Tailwind 4 · Supabase (Postgres, auth, storage) · 
 
 - Database schema and security rules: [supabase/migrations/0001_schema.sql](supabase/migrations/0001_schema.sql)
 - Page map and build order: [docs/PAGE_MAP.md](docs/PAGE_MAP.md)
+- **Going live (Supabase + GitHub + Vercel): [docs/DEPLOY.md](docs/DEPLOY.md)**
 
 ## Setup (cloud Supabase)
 
@@ -40,12 +41,9 @@ npx supabase start -x studio,imgproxy,edge-runtime,logflare,vector,realtime,post
 
 This starts a local database, applies everything in `supabase/migrations/`, and prints a local API URL and anon key for `.env.local`. `npx supabase db reset` wipes it and re-applies the migrations; `npx supabase stop` shuts it down.
 
-## Deploy to Vercel
+## Deploy
 
-1. Put the project on GitHub (`git init`, commit, push to a private repository).
-2. On vercel.com choose *Add New → Project* and import the repository. The defaults are correct.
-3. Add the two environment variables (with the **cloud** project's values) under *Environment Variables*, then deploy.
-4. In Supabase under *Authentication → URL Configuration*, set *Site URL* to your Vercel address so confirmation emails link back to the live app.
+Follow [docs/DEPLOY.md](docs/DEPLOY.md). It covers the Supabase project, pushing to GitHub, Vercel, sign-in email settings and making yourself the coach.
 
 ## How access is protected
 

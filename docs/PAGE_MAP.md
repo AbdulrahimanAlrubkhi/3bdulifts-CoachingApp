@@ -8,6 +8,8 @@ Status: **built** = working now · **step N** = arrives with that feature group.
 |---|---|---|
 | `/login` | Sign in | built |
 | `/signup` | Create client account | built |
+| `/forgot`, `/reset` | Forgot password → email link → set a new password | built |
+| `/auth/callback` | Where links in emails land (confirm sign-up, reset password) | built |
 | `/r/[token]` | Shared routine (read-only, no account needed) | built |
 
 ## Client

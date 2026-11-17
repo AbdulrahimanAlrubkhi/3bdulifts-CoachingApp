@@ -2,7 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { SUPABASE_KEY, SUPABASE_URL, supabaseConfigured } from "@/lib/supabase/env";
 
-const PUBLIC_PATHS = ["/login", "/signup", "/r/"];
+const PUBLIC_PATHS = ["/login", "/signup", "/forgot", "/auth/", "/r/"];
 
 // Keeps the Supabase session cookie fresh and sends signed-out visitors to /login.
 // This is only a first gate: the real protection is row-level security in the database
