@@ -5,12 +5,14 @@ Next.js 16 · TypeScript · Tailwind 4 · Supabase (Postgres, auth, storage) · 
 
 - Database schema and security rules: [supabase/migrations/0001_schema.sql](supabase/migrations/0001_schema.sql)
 - Page map and build order: [docs/PAGE_MAP.md](docs/PAGE_MAP.md)
-- **Going live (Supabase + GitHub + Vercel): [docs/DEPLOY.md](docs/DEPLOY.md)**
+- **Going live, backups, restore, deleting a client: [docs/DEPLOY.md](docs/DEPLOY.md)**
+- Pilot-readiness review and test results: [docs/REVIEW.md](docs/REVIEW.md) · two-week pilot checklist: [docs/PILOT.md](docs/PILOT.md)
+- Sign-up is **by invitation only** once a coach exists: add client emails under *Clients → Invite a client*.
 
 ## Setup (cloud Supabase)
 
 1. **Create a Supabase project** at supabase.com (the free tier is enough to start). Pick a region close to Oman, such as Mumbai or Frankfurt.
-2. **Create the database.** In Supabase open *SQL Editor* and run each file in `supabase/migrations/` once, in number order: `0001_schema.sql`, then `0002_seed_exercises.sql` (50 exercises) `0003_seed_foods.sql` (166 foods, values per 100 g) `0004_photos_owner_writes.sql` (progress photos: only the client can change them, the coach can view) `0005_training_days.sql` and `0006_leaderboard_oman_day.sql`.
+2. **Create the database.** In Supabase open *SQL Editor* and run each file in `supabase/migrations/` once, in number order (`0001` … `0007`).
 3. **Add the keys.** Copy `.env.example` to `.env.local` and fill in the project URL and the anon (publishable) key from *Project Settings → API*.
 4. **Run it.**
 
